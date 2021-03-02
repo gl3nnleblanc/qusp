@@ -1,3 +1,6 @@
+module MatrixProductState
+
+export mps
 # A basic MPS calculation
 using LinearAlgebra
 using TSVD
@@ -30,3 +33,5 @@ function mps(A, bond_dim=2)
     push!(sites, next * diagm(s))
     return sites
  end
+
+ end # module
