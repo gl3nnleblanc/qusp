@@ -27,6 +27,6 @@ function mps(A, bond_dim=2)
     A_new = reshape(next, 2, 2^2)
     next, s, V = TSVD.tsvd(A_new, bond_dim)
     push!(sites, V)
-    #push!(next * diagm(s))
+    push!(sites, next * diagm(s))
     return sites
  end
