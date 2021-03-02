@@ -6,9 +6,17 @@ using LinearAlgebra
 using TSVD
 
 function mps(A, bond_dim=2)
+    # Limited to tensors with each index having equal dimension
+    for axis_dimension in size(A)
+        if axis_dimension != size(A)[1]
+            throw(DomainError(size(A), "mps is not supported for tensors hav" *
+                              "ing nonuniform dimensions"))
+        end
+    end
     # Returns a matrix product state representation of A.
     #  A |-> [M_1, M_2, ... , M_r]
-    # TODO: wrapper class to replace SITES supporting contraction with other tensor
+    # TODO: wrapper class to replace SITES supporting contraction with other
+    #   tensor
     # TODO: support choosing left/right canonical form
     sites = []
     next = []
