@@ -5,20 +5,6 @@ export mps
 using LinearAlgebra
 using TSVD
 
-"""
-    truncate(s, dim)
-
-Zero entries of `s` on indices greater than `dim`.
-"""
-function truncate(s, dim)
-    for (i,_)=enumerate(s)
-        if i > dim
-            s[i]=0
-        end
-    end
-    return s
-end
-
 
 """
     mps(A, bond_dim)
@@ -44,20 +30,20 @@ function mps(A, bond_dim=2)
     end
     A_new = reshape(A, 2^(rank-1), 2^1)
     next, s, V = svd(A_new)
-    s = truncate(s, bond_dim)
+    s = s[1:bond_dim]
     next = next * diagm(s)
     push!(sites, transpose(V))
     for i=2:rank-2
         print(i)
         A_new = reshape(next, 2^(rank-i), 2^2)
         next, s, V = svd(A_new)
-        s = truncate(s, bond_dim)
+        s = s[1:bond_dim]
         next = next * diagm(s)
-        push!(sites, reshape(transpose(V), 2, 2, 2))
+        push!(sites, reshape(V, 2, 2, 2))
     end
     A_new = reshape(next, 2, 2^2)
     next, s, V = svd(A_new)
-    s = truncate(s, bond_dim)
+    s = s[1:bond_dim]
     push!(sites, transpose(V))
     push!(sites, next * diagm(s))
     return sites

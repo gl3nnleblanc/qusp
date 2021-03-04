@@ -36,5 +36,9 @@ using .MatrixProductState
         intermediate = reshape(sites[2], 4, 2) * sites[1]
         A_mps = reshape(sites[3] * reshape(intermediate, 2, 4), 2, 2, 2)
         @test abs(dot(A, A_mps) - 4) < 1e-6
+
+        # Big test
+        A = zeros((2 for _=1:4)...)
+        sites = mps(A)
     end
 end
