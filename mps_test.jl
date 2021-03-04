@@ -24,7 +24,7 @@ using .MatrixProductState
         sites = mps(A)
         intermediate = reshape(sites[2], 4, 2) * sites[1]
         A_mps = reshape(sites[3] * reshape(intermediate, 2, 4), 2, 2, 2)
-        @test abs(dot(A, A_mps) - 7) < 1e-6
+        @test abs(dot(A, A_mps) / dot(A, A) - 1) < 1e-7
 
         # Second simple test
         A = zeros(2,2,2)
@@ -35,10 +35,19 @@ using .MatrixProductState
         sites = mps(A)
         intermediate = reshape(sites[2], 4, 2) * sites[1]
         A_mps = reshape(sites[3] * reshape(intermediate, 2, 4), 2, 2, 2)
-        @test abs(dot(A, A_mps) - 4) < 1e-6
+        @test abs(dot(A, A_mps) / dot(A, A) - 1) < 1e-7
 
-        # Big test
-        A = zeros((2 for _=1:4)...)
+        # Bigger test
+        rank = 6
+        A = zeros((2 for _=1:rank)...)
+        A[(1 for _=1:rank)...] = 1
+        A[(2 for _=1:rank)...] = -1
         sites = mps(A)
+        intermediate = reshape(sites[2], 4, 2) * sites[1]
+        for i=2:rank-2
+            intermediate = reshape(sites[i+1], 4, 2) * reshape(intermediate, 2, 2^i)
+        end
+        A_mps = sites[rank] * reshape(intermediate, 2, 2^(rank-1))
+        @test dot(A_mps, A) / dot(A, A) == 1
     end
 end

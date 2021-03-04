@@ -3,7 +3,6 @@ module MatrixProductState
 export mps
 # A basic MPS calculation
 using LinearAlgebra
-using TSVD
 
 
 """
@@ -34,10 +33,12 @@ function mps(A, bond_dim=2)
     next = next * diagm(s)
     push!(sites, transpose(V))
     for i=2:rank-2
-        print(i)
         A_new = reshape(next, 2^(rank-i), 2^2)
         next, s, V = svd(A_new)
         s = s[1:bond_dim]
+        V = transpose(V)
+        V = V[1:bond_dim,:]
+        next = next[:,1:bond_dim]
         next = next * diagm(s)
         push!(sites, reshape(V, 2, 2, 2))
     end
