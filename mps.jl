@@ -43,7 +43,7 @@ function mps(A, bond_dim=2)
         next_axis_dim = 0
         if length(V) < bond_dim^2 * 2
             prev_axis_dim = size(sites[i-1])[1]
-            next_axis_dim = div(length(V), 2 * prev_axis_dim)
+            next_axis_dim = length(V) ÷ (2 * prev_axis_dim)
             push!(sites, reshape(V, next_axis_dim, 2, prev_axis_dim))
         else
             push!(sites, reshape(V, bond_dim, 2, bond_dim))
@@ -58,7 +58,7 @@ function mps(A, bond_dim=2)
     next, s, V = svd(A_new)
     V = transpose(V)
     s = s[1:(length(s)<bond_dim ? end : bond_dim)]
-    push!(sites, reshape(V, 2, 2, div(length(V), 4)))
+    push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next * diagm(s))
     return sites
  end
