@@ -29,21 +29,35 @@ function mps(A, bond_dim=2)
     end
     A_new = reshape(A, 2^(rank-1), 2^1)
     next, s, V = svd(A_new)
-    s = s[1:bond_dim]
+    s = s[1:(length(s)<bond_dim ? end : bond_dim)]
     next = next * diagm(s)
     push!(sites, transpose(V))
+    next_axis_dim=2
     for i=2:rank-2
-        A_new = reshape(next, 2^(rank-i), 2^2)
+        A_new = reshape(next, 2^(rank-i), next_axis_dim*2)
         next, s, V = svd(A_new)
-        s = s[1:bond_dim]
-        V = transpose(V)[1:bond_dim,:]
-        next = next[:,1:bond_dim] * diagm(s)
-        push!(sites, reshape(V, 2, 2, 2))
+        s = s[1:(length(s)<bond_dim ? end : bond_dim)]
+        V = transpose(V)
+        V = V[1:(size(V)[1]<bond_dim ? end : bond_dim),:]
+        next = next[:,1:(size(next)[2]<bond_dim ? end : bond_dim)] * diagm(s)
+        next_axis_dim = 0
+        if length(V) < bond_dim^2 * 2
+            prev_axis_dim = size(sites[i-1])[1]
+            next_axis_dim = div(length(V), 2 * prev_axis_dim)
+            push!(sites, reshape(V, next_axis_dim, 2, prev_axis_dim))
+        else
+            push!(sites, reshape(V, bond_dim, 2, bond_dim))
+            next_axis_dim = bond_dim
+        end
     end
-    A_new = reshape(next, 2, 2^2)
+    if bond_dim > 3
+        A_new = reshape(next, 2, 2^(next_axis_dim-1))
+    else
+        A_new = reshape(next, 2, 4)
+    end
     next, s, V = svd(A_new)
-    s = s[1:bond_dim]
-    push!(sites, transpose(V))
+    s = s[1:(length(s)<bond_dim ? end : bond_dim)]
+    push!(sites, reshape(transpose(V), 2, 2, div(length(V), 4)))
     push!(sites, next * diagm(s))
     return sites
  end

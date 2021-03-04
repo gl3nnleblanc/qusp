@@ -38,14 +38,20 @@ using .MatrixProductState
         @test abs(dot(A, A_mps) / dot(A, A) - 1) < 1e-7
 
         # Bigger test
-        rank = 6
-        A = zeros((2 for _=1:rank)...)
-        A[(1 for _=1:rank)...] = 1
-        A[(2 for _=1:rank)...] = -1
-        sites = mps(A)
-        intermediate = reshape(sites[2], 4, 2) * sites[1]
+        rank = 18
+        #A = zeros((2 for _=1:rank)...)
+        #A[(1 for _=1:rank)...] = 1
+        #A[(2 for _=1:rank)...] = -1
+        A = rand((2 for _=1:rank)...)
+        sites = mps(A, 18)
+        axis_dim = div(length(sites[2]), 2)
+        intermediate = reshape(sites[2], axis_dim, 2) * sites[1]
         for i=2:rank-2
-            intermediate = reshape(sites[i+1], 4, 2) * reshape(intermediate, 2, 2^i)
+            axis_dim = size(sites[i+1])[3]
+            left_axis_dim = div(length(sites[i+1]), axis_dim)
+            right_axis_dim = div(length(intermediate), axis_dim)
+            intermediate = reshape(sites[i+1], left_axis_dim, axis_dim) *
+                reshape(intermediate, axis_dim, right_axis_dim)
         end
         A_mps = sites[rank] * reshape(intermediate, 2, 2^(rank-1))
         @test dot(A_mps, A) / dot(A, A) == 1
