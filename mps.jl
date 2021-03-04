@@ -32,7 +32,7 @@ function mps(A, bond_dim=2)
     s = s[1:(length(s)<bond_dim ? end : bond_dim)]
     next = next * diagm(s)
     push!(sites, transpose(V))
-    next_axis_dim=2
+    next_axis_dim=length(s)
     for i=2:rank-2
         A_new = reshape(next, 2^(rank-i), next_axis_dim*2)
         next, s, V = svd(A_new)
@@ -56,8 +56,9 @@ function mps(A, bond_dim=2)
         A_new = reshape(next, 2, 4)
     end
     next, s, V = svd(A_new)
+    V = transpose(V)
     s = s[1:(length(s)<bond_dim ? end : bond_dim)]
-    push!(sites, reshape(transpose(V), 2, 2, div(length(V), 4)))
+    push!(sites, reshape(V, 2, 2, div(length(V), 4)))
     push!(sites, next * diagm(s))
     return sites
  end

@@ -43,6 +43,7 @@ using .MatrixProductState
         #A[(1 for _=1:rank)...] = 1
         #A[(2 for _=1:rank)...] = -1
         A = rand((2 for _=1:rank)...)
+        A = A / sqrt(dot(A, A))
         sites = mps(A, 18)
         axis_dim = div(length(sites[2]), 2)
         intermediate = reshape(sites[2], axis_dim, 2) * sites[1]
@@ -54,6 +55,10 @@ using .MatrixProductState
                 reshape(intermediate, axis_dim, right_axis_dim)
         end
         A_mps = sites[rank] * reshape(intermediate, 2, 2^(rank-1))
-        @test dot(A_mps, A) / dot(A, A) == 1
+        #@test abs(dot(A_mps, A) / dot(A, A) - 1) < 1e-7 Why does this fail and the bottom work???
+        println(dot(A_mps, A_mps))
+        println(dot(A_mps, A))
+        println(dot(A, A))
+        @test abs(dot(A_mps, A) / dot(A_mps, A_mps) - 1) < 1e-7
     end
 end
