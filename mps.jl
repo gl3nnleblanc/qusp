@@ -36,10 +36,8 @@ function mps(A, bond_dim=2)
         A_new = reshape(next, 2^(rank-i), 2^2)
         next, s, V = svd(A_new)
         s = s[1:bond_dim]
-        V = transpose(V)
-        V = V[1:bond_dim,:]
-        next = next[:,1:bond_dim]
-        next = next * diagm(s)
+        V = transpose(V)[1:bond_dim,:]
+        next = next[:,1:bond_dim] * diagm(s)
         push!(sites, reshape(V, 2, 2, 2))
     end
     A_new = reshape(next, 2, 2^2)
