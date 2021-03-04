@@ -20,12 +20,11 @@ using .MatrixProductState
         A[1,2,2] = 0
         A[2,1,2] = 0
         A[2,2,1] = 0
+        A[1,1,2] = 2
         sites = mps(A)
-        intermediate = transpose(reshape(sites[2], 2, 4)) * sites[3]
-        intermediate = reshape(intermediate, 2, 2, 2)
-        intermediate = sites[1] * reshape(intermediate, 2, 4)
-        A_mps = reshape(intermediate, 2, 2, 2)
-        @test abs(dot(A, A_mps) - 4) < 1e-6
+        intermediate = reshape(sites[2], 4, 2) * sites[1]
+        A_mps = reshape(sites[3] * reshape(intermediate, 2, 4), 2, 2, 2)
+        @test abs(dot(A, A_mps) - 7) < 1e-6
 
         # Second simple test
         A = zeros(2,2,2)
@@ -34,13 +33,8 @@ using .MatrixProductState
         A[2,1,2] = -1
         A[2,2,1] = 1
         sites = mps(A)
-        intermediate = transpose(reshape(sites[2], 2, 4)) * sites[3]
-        intermediate = reshape(intermediate, 2, 2, 2)
-        intermediate = sites[1] * reshape(intermediate, 2, 4)
-        A_mps = reshape(intermediate, 2, 2, 2)
-        print(A_mps)
-        print("\n\n\n")
-        print(A)
-        @test abs(dot(A, A_mps) - 20) < 1e-6
+        intermediate = reshape(sites[2], 4, 2) * sites[1]
+        A_mps = reshape(sites[3] * reshape(intermediate, 2, 4), 2, 2, 2)
+        @test abs(dot(A, A_mps) - 4) < 1e-6
     end
 end
