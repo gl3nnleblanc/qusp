@@ -44,7 +44,7 @@ using .MatrixProductState
         #A[(2 for _=1:rank)...] = -1
         A = rand((2 for _=1:rank)...)
         A = A / sqrt(dot(A, A))
-        sites = mps(A, 18)
+        sites = mps(A, 512)
         axis_dim = div(length(sites[2]), 2)
         intermediate = reshape(sites[2], axis_dim, 2) * sites[1]
         for i=2:rank-2
@@ -59,6 +59,6 @@ using .MatrixProductState
         println(dot(A_mps, A_mps))
         println(dot(A_mps, A))
         println(dot(A, A))
-        @test abs(dot(A_mps, A) / dot(A_mps, A_mps) - 1) < 1e-7
+        @test abs(dot(A_mps, A) - 1) < 1e-7
     end
 end

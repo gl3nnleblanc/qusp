@@ -29,14 +29,18 @@ function mps(A, bond_dim=2)
     end
     A_new = reshape(A, 2^(rank-1), 2^1)
     next, s, V = svd(A_new)
+    original_norm = norm(s)
     s = s[1:(length(s)<bond_dim ? end : bond_dim)]
+    s *= original_norm / norm(s)
     next = next * diagm(s)
     push!(sites, transpose(V))
     next_axis_dim=length(s)
     for i=2:rank-2
         A_new = reshape(next, 2^(rank-i), next_axis_dim*2)
         next, s, V = svd(A_new)
+        original_norm = norm(s)
         s = s[1:(length(s)<bond_dim ? end : bond_dim)]
+        s *= original_norm / norm(s)
         V = transpose(V)
         V = V[1:(size(V)[1]<bond_dim ? end : bond_dim),:]
         next = next[:,1:(size(next)[2]<bond_dim ? end : bond_dim)] * diagm(s)
@@ -57,7 +61,9 @@ function mps(A, bond_dim=2)
     end
     next, s, V = svd(A_new)
     V = transpose(V)
+    original_norm = norm(s)
     s = s[1:(length(s)<bond_dim ? end : bond_dim)]
+    s *= original_norm / norm(s)
     push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next * diagm(s))
     return sites
