@@ -55,10 +55,6 @@ using .MatrixProductState
                 reshape(intermediate, axis_dim, right_axis_dim)
         end
         A_mps = sites[rank] * reshape(intermediate, 2, 2^(rank-1))
-        #@test abs(dot(A_mps, A) / dot(A, A) - 1) < 1e-7 Why does this fail and the bottom work???
-        println(dot(A_mps, A_mps))
-        println(dot(A_mps, A))
-        println(dot(A, A))
         @test abs(dot(A_mps, A) - 1) < 1e-7
     end
 end

@@ -6,6 +6,27 @@ using LinearAlgebra
 
 
 """
+    A wrapper type for a matrix product state.
+"""
+struct MPS
+    sites::Array{Array{Float64}}
+end
+
+
+"""
+    truncate_and_renormalize(s, bond_dim)
+
+Truncate vector of singular values and renormalize.
+"""
+function truncate_and_renormalize(s::Array{Float64}, bond_dim::Int)
+    original_norm = norm(s)
+    s = s[1:(length(s) < bond_dim ? end : bond_dim)]
+    s *= original_norm / norm(s)
+    return s
+end
+
+
+"""
     mps(A, bond_dim)
 
 Generate a matrix product state representation of the tensor `A`, using bond
@@ -21,26 +42,22 @@ function mps(A, bond_dim=2)
     # TODO: wrapper class to replace SITES supporting contraction with other
     #   tensor
     # TODO: support choosing left/right canonical form
-    sites = []
-    next = []
-    rank = length(size(A))
-    if rank<2
+    sites::Array{Array{Float64}} = []
+    next::Array{Float64} = []
+    rank::Int = length(size(A))
+    if rank < 2
         return A
     end
     A_new = reshape(A, 2^(rank-1), 2^1)
     next, s, V = svd(A_new)
-    original_norm = norm(s)
-    s = s[1:(length(s)<bond_dim ? end : bond_dim)]
-    s *= original_norm / norm(s)
+    s = truncate_and_renormalize(s, bond_dim)
     next = next * diagm(s)
     push!(sites, transpose(V))
     next_axis_dim=length(s)
     for i=2:rank-2
         A_new = reshape(next, 2^(rank-i), next_axis_dim*2)
         next, s, V = svd(A_new)
-        original_norm = norm(s)
-        s = s[1:(length(s)<bond_dim ? end : bond_dim)]
-        s *= original_norm / norm(s)
+        s = truncate_and_renormalize(s, bond_dim)
         V = transpose(V)
         V = V[1:(size(V)[1]<bond_dim ? end : bond_dim),:]
         next = next[:,1:(size(next)[2]<bond_dim ? end : bond_dim)] * diagm(s)
@@ -61,9 +78,7 @@ function mps(A, bond_dim=2)
     end
     next, s, V = svd(A_new)
     V = transpose(V)
-    original_norm = norm(s)
-    s = s[1:(length(s)<bond_dim ? end : bond_dim)]
-    s *= original_norm / norm(s)
+    s = truncate_and_renormalize(s, bond_dim)
     push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next * diagm(s))
     return sites
