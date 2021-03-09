@@ -58,5 +58,11 @@ using .MatrixProductState
         end
         A_mps = sites[rank] * reshape(intermediate, 2, 2^(rank - 1))
         @test abs(dot(A_mps, A) - 1) < 1e-7
+
+        # Complex values test
+        rank = 5
+        A = rand(ComplexF32, (2 for _=1:rank)...)
+        A = A / sqrt(dot(A, conj(A)))
+        sites = mps(A, 4)
     end
 end
