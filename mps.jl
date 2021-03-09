@@ -46,8 +46,8 @@ function mps(A, bond_dim = 2)
     # TODO: wrapper class to replace SITES supporting contraction with other
     #   tensor
     # TODO: support choosing left/right canonical form
-    sites::Array{Array{Float64}} = []
-    next::Array{Float64} = []
+    sites::Array{Array{Number}} = []
+    next = []
     rank::Int = length(size(A))
     if rank < 2
         return A
@@ -56,13 +56,13 @@ function mps(A, bond_dim = 2)
     next, s, V = svd(A_new)
     s = truncate_and_renormalize(s, bond_dim)
     next = next * diagm(s)
-    push!(sites, transpose(V))
+    push!(sites, conj(transpose(V)))
     next_axis_dim = length(s)
     for i = 2:rank-2
         A_new = reshape(next, 2^(rank - i), next_axis_dim * 2)
         next, s, V = svd(A_new)
         s = truncate_and_renormalize(s, bond_dim)
-        V = transpose(V)
+        V = conj(transpose(V))
         V = V[1:(size(V)[1] < bond_dim ? end : bond_dim), :]
         next = next[:, 1:(size(next)[2] < bond_dim ? end : bond_dim)] * diagm(s)
         next_axis_dim = 0
@@ -81,7 +81,7 @@ function mps(A, bond_dim = 2)
         A_new = reshape(next, 2, 4)
     end
     next, s, V = svd(A_new)
-    V = transpose(V)
+    V = conj(transpose(V))
     s = truncate_and_renormalize(s, bond_dim)
     push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next * diagm(s))

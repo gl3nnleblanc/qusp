@@ -39,7 +39,7 @@ using .MatrixProductState
         @test abs(dot(A, A_mps) / dot(A, A) - 1) < 1e-7
 
         # Bigger test
-        rank = 18
+        rank = 4
         #A = zeros((2 for _=1:rank)...)
         #A[(1 for _=1:rank)...] = 1
         #A[(2 for _=1:rank)...] = -1
@@ -61,8 +61,21 @@ using .MatrixProductState
 
         # Complex values test
         rank = 5
-        A = rand(ComplexF32, (2 for _=1:rank)...)
+        A = rand(ComplexF64, (2 for _=1:rank)...)
         A = A / sqrt(dot(A, conj(A)))
         sites = mps(A, 4)
+        axis_dim = div(length(sites[2]), 2)
+        intermediate = reshape(sites[2], axis_dim, 2) * sites[1]
+        for i = 2:rank-2
+            axis_dim = size(sites[i+1])[3]
+            left_axis_dim = div(length(sites[i+1]), axis_dim)
+            right_axis_dim = div(length(intermediate), axis_dim)
+            intermediate =
+                reshape(sites[i+1], left_axis_dim, axis_dim) *
+                reshape(intermediate, axis_dim, right_axis_dim)
+        end
+        A_mps = sites[rank] * reshape(intermediate, 2, 2^(rank - 1))
+        @test dot(A_mps, conj(A_mps)) < 1e-7
+
     end
 end
