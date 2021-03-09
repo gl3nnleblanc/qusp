@@ -38,7 +38,7 @@ function mps(A, bond_dim = 2)
             throw(
                 DomainError(
                     size(A),
-                    "mps is not supported for tensors hav" * "ing nonuniform dimensions",
+                    "mps is not supported for tensors having nonuniform dimensions",
                 ),
             )
         end
