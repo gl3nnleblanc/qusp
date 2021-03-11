@@ -1,6 +1,6 @@
 module MatrixProductState
 
-export mps
+export MPS, mps, contract_mps
 # A basic MPS calculation
 using LinearAlgebra
 
@@ -8,8 +8,29 @@ using LinearAlgebra
 """
     A wrapper type for a matrix product state.
 """
-struct MPS
-    sites::Array{Array{Float64}}
+mutable struct MPS
+    sites
+end
+
+
+"""
+    Contracts the MPS into a single tensor.
+"""
+function contract_mps(m::MPS)
+    sites = m.sites
+    rank = length(sites)
+    axis_dim = div(length(sites[2]), 2)
+    intermediate = reshape(sites[2], axis_dim, 2) * sites[1]
+    for i = 2:rank-2
+        axis_dim = size(sites[i+1])[3]
+        left_axis_dim = div(length(sites[i+1]), axis_dim)
+        right_axis_dim = div(length(intermediate), axis_dim)
+        intermediate =
+            reshape(sites[i+1], left_axis_dim, axis_dim) *
+            reshape(intermediate, axis_dim, right_axis_dim)
+    end
+    res = sites[rank] * reshape(intermediate, 2, 2^(rank - 1))
+    return reshape(res, (2 for _=1:rank)...)
 end
 
 
@@ -19,9 +40,9 @@ end
 Truncate vector of singular values and renormalize.
 """
 function truncate_and_renormalize(s, bond_dim)
-    original_norm = norm(s)
+    original_norm = sqrt(dot(s, conj(s)))
     s = s[1:(length(s) < bond_dim ? end : bond_dim)]
-    s *= original_norm / norm(s)
+    s *= original_norm / sqrt(dot(s, conj(s)))
     return s
 end
 
@@ -85,7 +106,7 @@ function mps(A, bond_dim = 2)
     s = truncate_and_renormalize(s, bond_dim)
     push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next * diagm(s))
-    return sites
+    return MPS(sites)
 end
 
 end # module
