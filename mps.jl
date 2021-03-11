@@ -9,7 +9,8 @@ using LinearAlgebra
     A wrapper type for a matrix product state.
 """
 mutable struct MPS
-    sites::Any
+    # TODO: support contraction with another tensor
+    sites::Array{Array{Any}}
 end
 
 
@@ -54,6 +55,7 @@ Generate a matrix product state representation of the tensor `A`, using bond
 dimension `bond_dim`. Limited to tensors having equal dimension on each index.
 """
 function mps(A, bond_dim = 2)
+    # TODO: support choosing left / right canonical form
     for axis_dimension in size(A)
         if axis_dimension != size(A)[1]
             throw(
@@ -64,9 +66,6 @@ function mps(A, bond_dim = 2)
             )
         end
     end
-    # TODO: wrapper class to replace SITES supporting contraction with other
-    #   tensor
-    # TODO: support choosing left/right canonical form
     sites = []
     next = []
     rank::Int = length(size(A))
