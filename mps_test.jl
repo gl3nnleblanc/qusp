@@ -47,7 +47,7 @@ using .MatrixProductState
 
         # Complex values test
         rank = 10
-        A = rand(ComplexF64, (2 for _=1:rank)...)
+        A = rand(ComplexF64, (2 for _ = 1:rank)...)
         A = A / sqrt(dot(A, conj(A)))
         A_mps = contract_mps(mps(A, 2^5))
         @test abs(dot(conj(A_mps), A)) - 1 < 1e-7

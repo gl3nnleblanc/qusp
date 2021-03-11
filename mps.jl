@@ -9,7 +9,7 @@ using LinearAlgebra
     A wrapper type for a matrix product state.
 """
 mutable struct MPS
-    sites
+    sites::Any
 end
 
 
@@ -30,7 +30,7 @@ function contract_mps(m::MPS)
             reshape(intermediate, axis_dim, right_axis_dim)
     end
     res = sites[rank] * reshape(intermediate, 2, 2^(rank - 1))
-    return reshape(res, (2 for _=1:rank)...)
+    return reshape(res, (2 for _ = 1:rank)...)
 end
 
 
