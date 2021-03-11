@@ -41,9 +41,9 @@ end
 Truncate vector of singular values and renormalize.
 """
 function truncate_and_renormalize(s, bond_dim)
-    original_norm = sqrt(dot(s, conj(s)))
+    original_norm = sqrt(dot(s, s))
     s = s[1:(length(s) < bond_dim ? end : bond_dim)]
-    s *= original_norm / sqrt(dot(s, conj(s)))
+    s *= original_norm / sqrt(dot(s, s))
     return s
 end
 
