@@ -64,5 +64,17 @@ using .MatrixProductState
         A = rand(ComplexF32, (2 for _=1:rank)...)
         A = A / sqrt(dot(A, conj(A)))
         sites = mps(A, 4)
+        axis_dim = div(length(sites[2]), 2)
+        intermediate = reshape(sites[2], axis_dim, 2) * sites[1]
+        for i = 2:rank-2
+            axis_dim = size(sites[i+1])[3]
+            left_axis_dim = div(length(sites[i+1]), axis_dim)
+            right_axis_dim = div(length(intermediate), axis_dim)
+            intermediate =
+                reshape(sites[i+1], left_axis_dim, axis_dim) *
+                reshape(intermediate, axis_dim, right_axis_dim)
+        end
+        A_mps = sites[rank] * reshape(intermediate, 2, 2^(rank - 1))
+        @test abs(dot(conj(A_mps), A)) - 1 < 1e-5
     end
 end
