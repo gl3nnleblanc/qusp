@@ -47,6 +47,15 @@ function truncate_and_renormalize(s, bond_dim)
     return s
 end
 
+function split_tensor(A, rank, left_axis_dim, right_axis_dim, bond_dim, sites)
+    A_new = reshape(A, left_axis_dim, right_axis_dim)
+    next, s, V_dag = svd(A_new)
+    s = truncate_and_renormalize(s, bond_dim)
+    next = next * diagm(s)
+    push!(sites, conj(transpose(V_dag)))
+    return next, length(s)
+end
+
 
 """
     mps(A, bond_dim)
@@ -72,12 +81,8 @@ function mps(A, bond_dim = 2)
     if rank < 2
         return A
     end
-    A_new = reshape(A, 2^(rank - 1), 2^1)
-    next, s, V = svd(A_new)
-    s = truncate_and_renormalize(s, bond_dim)
-    next = next * diagm(s)
-    push!(sites, conj(transpose(V)))
-    next_axis_dim = length(s)
+    # Split(tensor A, axis_dim, sites[])
+    next, next_axis_dim = split_tensor(A, rank, 2^(rank-1), 2^1, bond_dim, sites)
     for i = 2:rank-2
         A_new = reshape(next, 2^(rank - i), next_axis_dim * 2)
         next, s, V = svd(A_new)
