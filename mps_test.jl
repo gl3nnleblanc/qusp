@@ -37,9 +37,6 @@ using .MatrixProductState
 
         # Bigger test
         rank = 4
-        #A = zeros((2 for _=1:rank)...)
-        #A[(1 for _=1:rank)...] = 1
-        #A[(2 for _=1:rank)...] = -1
         A = rand((2 for _ = 1:rank)...)
         A = A / sqrt(dot(A, A))
         A_mps = contract_mps(mps(A, 512))
@@ -47,9 +44,10 @@ using .MatrixProductState
 
         # Complex values test
         rank = 10
-        A = rand(ComplexF64, (2 for _ = 1:rank)...)
-        A = A / sqrt(dot(A, conj(A)))
-        A_mps = contract_mps(mps(A, 2^5))
-        @test abs(dot(conj(A_mps), A)) - 1 < 1e-7
+        A = rand((2 for _ = 1:rank)...)
+        A = A / sqrt(dot(A, A))
+        A_mps = contract_mps(mps(A, 4))
+        @test abs(dot(A, A)) - 1 < 1e-7
+        @test abs(dot(A_mps, A_mps)) - 1 < 1e-7
     end
 end
