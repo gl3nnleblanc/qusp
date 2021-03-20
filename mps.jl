@@ -47,13 +47,12 @@ function truncate_and_renormalize(s, bond_dim)
     return s
 end
 
-function split_tensor(A, rank, left_axis_dim, right_axis_dim, bond_dim, sites)
+function split_tensor(A, left_axis_dim, right_axis_dim, bond_dim)
     A_new = reshape(A, left_axis_dim, right_axis_dim)
     next, s, V_dag = svd(A_new)
     s = truncate_and_renormalize(s, bond_dim)
     next = next * diagm(s)
-    push!(sites, conj(transpose(V_dag)))
-    return next, length(s)
+    return conj(transpose(V_dag)), next, length(s)
 end
 
 
@@ -81,15 +80,15 @@ function mps(A, bond_dim = 2)
     if rank < 2
         return A
     end
-    # Split(tensor A, axis_dim, sites[])
-    next, next_axis_dim = split_tensor(A, rank, 2^(rank-1), 2^1, bond_dim, sites)
+    site, next, next_axis_dim = split_tensor(A, 2^(rank-1), 2^1, bond_dim)
+    push!(sites, site)
     for i = 2:rank-2
         A_new = reshape(next, 2^(rank - i), next_axis_dim * 2)
         next, s, V = svd(A_new)
         s = truncate_and_renormalize(s, bond_dim)
         V = conj(transpose(V))
-        V = V[1:(size(V)[1] < bond_dim ? end : bond_dim), :]
-        next = next[:, 1:(size(next)[2] < bond_dim ? end : bond_dim)] * diagm(s)
+        V = V[1:min(size(V)[1], bond_dim), :]
+        next = next[:, 1:min(size(next)[2], bond_dim)] * diagm(s)
         next_axis_dim = 0
         if length(V) < bond_dim^2 * 2
             prev_axis_dim = size(sites[i-1])[1]
