@@ -59,6 +59,8 @@ up to `bond_dim` singular values. Visually,
 where the rightmost dangling edge has dimension `right_axis_dim` and the
 leftmost dangingle edge has dimension `left_axis_dim`. The virtual bond has
 dimension `bond_dim`.
+
+Returns outgoing edge dimension, left matrix, right matrix.
 """
 function split_tensor(A, left_axis_dim, right_axis_dim, bond_dim)
     A_new = reshape(A, left_axis_dim, right_axis_dim)
@@ -98,7 +100,8 @@ function mps(A, bond_dim = 2)
     next_axis_dim, next, site = split_tensor(A, 2^(rank - 1), 2^1, bond_dim)
     push!(sites, site)
     for i = 2:rank-2
-        next_axis_dim, next, V = split_tensor(next, 2^(rank - i), next_axis_dim*2, bond_dim)
+        next_axis_dim, next, V =
+            split_tensor(next, 2^(rank - i), next_axis_dim * 2, bond_dim)
         if length(V) == bond_dim^2 * 2
             push!(sites, reshape(V, bond_dim, 2, bond_dim))
         else
