@@ -2,7 +2,9 @@ using LinearAlgebra
 using Test
 
 include("./mps.jl")
+include("./tebd.jl")
 using .MatrixProductState
+using .TimeEvolvingBlockDecimation
 
 @testset "Matrix Product State Tests" begin
     @testset "Error Handling" begin
@@ -44,7 +46,7 @@ using .MatrixProductState
 
         # Complex values test
         rank = 10
-        A = rand((2 for _ = 1:rank)...)
+        A = rand(ComplexF32, (2 for _ = 1:rank)...)
         A = A / sqrt(dot(A, A))
         A_mps = contract_mps(mps(A, 4))
         @test abs(dot(A, A)) - 1 < 1e-7
