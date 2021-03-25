@@ -9,7 +9,7 @@ using LinearAlgebra
 """
 mutable struct MPS
     # TODO: support contraction with another tensor
-    sites::Array{Array{Any}}
+    sites::Array{Array{<:Number}}
 end
 
 

@@ -1,10 +1,9 @@
 using LinearAlgebra
 using Test
 
-include("./mps.jl")
 include("./tebd.jl")
-using .MatrixProductState
 using .TimeEvolvingBlockDecimation
+using .TimeEvolvingBlockDecimation.MatrixProductState
 
 @testset "Time Evolving Block Decimation Tests" begin
     ⊗ = kron
@@ -23,6 +22,6 @@ using .TimeEvolvingBlockDecimation
         ψ = rand(ComplexF32, (2 for _ = 1:6)...)
         ψ /= sqrt(dot(ψ, ψ))
         ψ_mps = mps(ψ)
-        block_evolve(ψ_mps, ising, 1)
+        block_evolve(ψ_mps, ising, 2)
     end
 end
