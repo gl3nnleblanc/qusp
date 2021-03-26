@@ -1,6 +1,6 @@
 module MatrixProductState
 
-export MPS, mps, contract_mps
+export MPS, mps, contract_mps, split_tensor
 # A basic MPS calculation
 using LinearAlgebra
 
@@ -10,6 +10,7 @@ using LinearAlgebra
 mutable struct MPS
     # TODO: support contraction with another tensor
     sites::Array{Array{<:Number}}
+    bond_dim::Integer
 end
 
 
@@ -61,7 +62,12 @@ dimension `bond_dim`.
 
 Returns outgoing edge dimension, left matrix, right matrix.
 """
-function split_tensor(A, left_axis_dim, right_axis_dim, bond_dim)
+function split_tensor(
+    A::Array{<:Number},
+    left_axis_dim::Integer,
+    right_axis_dim::Integer,
+    bond_dim::Integer,
+)
     A_new = reshape(A, left_axis_dim, right_axis_dim)
     next, s, V_dag = svd(A_new)
     V = conj(transpose(V_dag))
@@ -117,7 +123,7 @@ function mps(A, bond_dim = 2)
     _, next, V = split_tensor(next, 2, prev_axis_dim, bond_dim)
     push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next)
-    return MPS(sites)
+    return MPS(sites, bond_dim)
 end
 
 end # module
