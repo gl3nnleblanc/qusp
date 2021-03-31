@@ -58,7 +58,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
                     ψ.bond_dim,
                 ),
             )
-        # Middle pairs
+            # Middle pairs
         elseif i < N
             @tensor begin
                 block[left, q1, q2, right] :=
@@ -81,7 +81,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
                     ψ.bond_dim,
                 ),
             )
-        # Right edge
+            # Right edge
         elseif i == N
             @tensor begin
                 block[left, q1, q2] := left_site[left, q1, chi] * right_site[chi, q2]
