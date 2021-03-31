@@ -23,6 +23,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
     updated_sites::Array{Array{<:Number}} = []
     interaction = reshape(exp(H.interaction * t), 2, 2, 2, 2)
     field = exp(H.field * t)
+    half_field = exp(H.field * t / 2)
     N = length(ψ.sites)
     for i = 2:length(ψ.sites)
         right_site = ψ.sites[i]
@@ -35,6 +36,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             left_site = updated_sites[i-1]
         end
 
+        # Left edge
         if i == 2
             @tensor begin
                 block[q1, q2, right] := left_site[q1, chi] * right_site[chi, q2, right]
@@ -42,7 +44,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
                     block[a, b, right] *
                     interaction[a, b, c, d] *
                     field[c, q1] *
-                    field[d, q2]
+                    half_field[d, q2]
             end
             _, new_left_site, new_right_site =
                 split_tensor(evolved, 2, 2 * ψ.bond_dim, ψ.bond_dim)
@@ -56,6 +58,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
                     ψ.bond_dim,
                 ),
             )
+        # Middle pairs
         elseif i < N
             @tensor begin
                 block[left, q1, q2, right] :=
@@ -63,8 +66,8 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
                 evolved[left, q1, q2, right] :=
                     block[left, a, b, right] *
                     interaction[a, b, c, d] *
-                    field[c, q1] *
-                    field[d, q2]
+                    half_field[c, q1] *
+                    half_field[d, q2]
             end
             _, new_left_site, new_right_site =
                 split_tensor(evolved, 2 * ψ.bond_dim, 2 * ψ.bond_dim, ψ.bond_dim)
@@ -78,13 +81,14 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
                     ψ.bond_dim,
                 ),
             )
+        # Right edge
         elseif i == N
             @tensor begin
                 block[left, q1, q2] := left_site[left, q1, chi] * right_site[chi, q2]
                 evolved[left, q1, q2] :=
                     block[left, a, b] *
                     interaction[a, b, c, d] *
-                    field[c, q1] *
+                    half_field[c, q1] *
                     field[d, q2]
             end
             _, new_left_site, new_right_site =

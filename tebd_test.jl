@@ -16,12 +16,41 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
         0 -1
     ]
     ising = Hamiltonian(σ_z ⊗ σ_z, σ_x)
-    @testset "Error Handling" begin end
-    @testset "Hamiltonians" begin end
+    function ising_matrix(sites::Integer)
+        I = [1 0;
+             0 1]
+        identity_string = [I for _=1:sites]
+        local_term = zeros(2^sites, 2^sites)
+        interaction_term = zeros(2^sites, 2^sites)
+
+        for i in 1:sites
+            pauli_string = copy(identity_string)
+            pauli_string[i] = σ_x
+            local_term += reduce(kron, pauli_string)
+        end
+
+        for i in 1:sites-1
+            pauli_string = copy(identity_string)
+            pauli_string[i] = σ_z
+            pauli_string[i+1] = σ_z
+            interaction_term += reduce(kron, pauli_string)
+        end
+        return  interaction_term + local_term
+    end
     @testset "Block Decimation" begin
-        ψ = rand(ComplexF32, (2 for _ = 1:6)...)
+        sites = 3
+        ψ = ones(ComplexF32, (2 for _ = 1:sites)...)
         ψ /= sqrt(dot(ψ, ψ))
         ψ_mps = mps(ψ)
-        block_evolve(ψ_mps, ising, 2)
+        ψ_res = reshape(contract_mps(block_evolve(ψ_mps, ising, 0)), 2^sites)
+
+        ϕ = ones(ComplexF32, 2^sites)
+        ϕ /= sqrt(dot(ϕ, ϕ))
+        I = [1 0; 0 1]
+        H = ising_matrix(sites)
+        ϕ_res = exp(H * 0) * ϕ
+
+        @assert dot(ψ_res, ϕ_res) == 1
+
     end
 end
