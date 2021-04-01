@@ -52,7 +52,7 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
         H = ising_matrix(sites)
         ϕ_res = exp(H * 0) * ϕ
 
-        @assert dot(ψ_res, ϕ_res) == 1
+        @test dot(ψ_res, ϕ_res) == 1
 
     end
 end
