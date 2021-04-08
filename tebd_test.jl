@@ -13,7 +13,7 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     ]
     σ_z = [
         1 0
-        0 -1
+        0 1
     ]
     ising = Hamiltonian(σ_z ⊗ σ_z, σ_x)
     function ising_matrix(sites::Integer)
@@ -41,12 +41,20 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     end
     @testset "Block Decimation" begin
         sites = 3
-        ψ = ones(ComplexF32, (2 for _ = 1:sites)...)
+        ψ = zeros(ComplexF32, (2 for _ = 1:sites)...)
+        ψ[2, 2, 2] = 1
+
         ψ /= sqrt(dot(ψ, ψ))
         ψ_mps = mps(ψ)
+        ψ_int = block_evolve(ψ_mps, ising, 0)
+        for site in ψ_int.sites
+            println(site)
+        end
         ψ_res = reshape(contract_mps(block_evolve(ψ_mps, ising, 0)), 2^sites)
+        println(ψ_res)
 
-        ϕ = ones(ComplexF32, 2^sites)
+        ϕ = zeros(ComplexF32, 2^sites)
+        ϕ[2^sites] = 1
         ϕ /= sqrt(dot(ϕ, ϕ))
         I = [1 0; 0 1]
         H = ising_matrix(sites)
