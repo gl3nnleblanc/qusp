@@ -4,7 +4,7 @@ export Hamiltonian, block_evolve
 
 include("./mps.jl")
 using .MatrixProductState
-using TensorOperations
+using Einsum
 
 """
     A 1D hamiltonian with a local term and nearest neighbor interactions.
@@ -38,14 +38,12 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
 
         # Left edge
         if i == 2
-            @tensor begin
-                block[q1, q2, right] := left_site[q1, chi] * right_site[chi, q2, right]
-                evolved[q1, q2, right] :=
-                    block[a, b, right] *
-                    interaction[a, b, c, d] *
-                    field[c, q1] *
-                    half_field[d, q2]
-            end
+            @einsum block[q1, q2, right] := left_site[q1, chi] * right_site[chi, q2, right]
+            @einsum evolved[q1, q2, right] :=
+                block[a, b, right] *
+                interaction[a, b, c, d] *
+                field[c, q1] *
+                half_field[d, q2]
             _, new_left_site, new_right_site =
                 split_tensor(evolved, 2, 2 * ψ.bond_dim, ψ.bond_dim)
             push!(updated_sites, new_left_site)
@@ -60,15 +58,13 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             )
             # Middle pairs
         elseif i < N
-            @tensor begin
-                block[left, q1, q2, right] :=
-                    left_site[left, q1, chi] * right_site[chi, q2, right]
-                evolved[left, q1, q2, right] :=
-                    block[left, a, b, right] *
-                    interaction[a, b, c, d] *
-                    half_field[c, q1] *
-                    half_field[d, q2]
-            end
+            @einsum block[left, q1, q2, right] :=
+                left_site[left, q1, chi] * right_site[chi, q2, right]
+            @einsum evolved[left, q1, q2, right] :=
+                block[left, a, b, right] *
+                interaction[a, b, c, d] *
+                half_field[c, q1] *
+                half_field[d, q2]
             _, new_left_site, new_right_site =
                 split_tensor(evolved, 2 * ψ.bond_dim, 2 * ψ.bond_dim, ψ.bond_dim)
             updated_sites[i-1] = reshape(new_left_site, ψ.bond_dim, 2, ψ.bond_dim)
@@ -83,14 +79,12 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             )
             # Right edge
         elseif i == N
-            @tensor begin
-                block[left, q1, q2] := left_site[left, q1, chi] * right_site[chi, q2]
-                evolved[left, q1, q2] :=
-                    block[left, a, b] *
-                    interaction[a, b, c, d] *
-                    half_field[c, q1] *
-                    field[d, q2]
-            end
+            @einsum block[left, q1, q2] := left_site[left, q1, chi] * right_site[chi, q2]
+            @einsum evolved[left, q1, q2] :=
+                block[left, a, b] *
+                interaction[a, b, c, d] *
+                half_field[c, q1] *
+                field[d, q2]
             _, new_left_site, new_right_site =
                 split_tensor(evolved, 2 * ψ.bond_dim, 2, ψ.bond_dim)
             updated_sites[i-1] = reshape(
