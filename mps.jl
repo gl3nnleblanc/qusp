@@ -42,6 +42,9 @@ Truncate vector of singular values and renormalize.
 """
 function truncate_and_renormalize(s, bond_dim)
     original_norm = sqrt(dot(s, s))
+    if original_norm == 0
+        return s[1:min(length(s), bond_dim)]
+    end
     s = s[1:min(length(s), bond_dim)]
     s *= original_norm / sqrt(dot(s, s))
     return s
