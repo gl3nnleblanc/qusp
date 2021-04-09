@@ -1,10 +1,28 @@
 using LinearAlgebra
+using Einsum
 using Test
 
 include("./tebd.jl")
 using .TimeEvolvingBlockDecimation
 using .TimeEvolvingBlockDecimation.MatrixProductState
 
+@testset "Einsum Tests" begin
+    ψ1 = [0; 1]
+    ψ2 = [0; 1]
+    ⊗ = kron
+    ψ = ψ1 ⊗ ψ2
+    X = [0 1;
+         1 0]
+    Y = [0 -1;
+         1 0]
+    G = reshape(X ⊗ Y, 2, 2, 2, 2)
+
+    @einsum res[q1, q2] := G[q1, q2, a, b] * ψ1[a] * ψ2[b]
+    @test reshape(res, 4) == (X ⊗ Y) * ψ
+
+    @einsum res[q1,q2] := ψ1[a] * ψ2[b] * G[a, b, q1, q2]
+    @test reshape(res, 4) != (X ⊗ Y) * ψ
+end
 @testset "Time Evolving Block Decimation Tests" begin
     ⊗ = kron
     σ_x = [
