@@ -11,17 +11,38 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     ψ2 = [0; 1]
     ⊗ = kron
     ψ = ψ1 ⊗ ψ2
-    X = [0 1;
-         1 0]
-    Y = [0 -1;
-         1 0]
+    X = [
+        0 1
+        1 0
+    ]
+    Y = [
+        0 -1
+        1 0
+    ]
     G = reshape(X ⊗ Y, 2, 2, 2, 2)
 
     @einsum res[q1, q2] := G[q1, q2, a, b] * ψ1[a] * ψ2[b]
     @test reshape(res, 4) == (X ⊗ Y) * ψ
 
-    @einsum res[q1,q2] := ψ1[a] * ψ2[b] * G[a, b, q1, q2]
+    @einsum res[q1, q2] := ψ1[a] * ψ2[b] * G[a, b, q1, q2]
     @test reshape(res, 4) != (X ⊗ Y) * ψ
+
+    I = zeros(2,2,2,2)
+    I[1,1,1,1] = 1
+    I[1,1,2,2] = 1
+    I[2,2,1,1] = 1
+    I[2,2,2,2] = 1
+    @einsum res[q1, q2] := I[a, q1, c, q2] * ψ1[a] * ψ2[c]
+    @test reshape(res, 4) == [0, 0, 0, 1]
+
+    G = zeros(2,2,2,2)
+    G[1, 2, 1, 1] = 1
+    G[2, 1, 1, 1] = 1
+    G[1, 2, 2, 2] = 1
+    G[2, 1, 2, 2] = 1
+    @einsum res[q1, q2] := G[a, q1, c, q2] * ψ1[a] * ψ2[c]
+    println(res)
+    @test reshape(transpose(res), 4) == [0, 1, 0, 0]
 end
 @testset "Time Evolving Block Decimation Tests" begin
     ⊗ = kron
