@@ -27,15 +27,15 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     @einsum res[q1, q2] := ψ1[a] * ψ2[b] * G[a, b, q1, q2]
     @test reshape(res, 4) != (X ⊗ Y) * ψ
 
-    I = zeros(2,2,2,2)
-    I[1,1,1,1] = 1
-    I[1,1,2,2] = 1
-    I[2,2,1,1] = 1
-    I[2,2,2,2] = 1
+    I = zeros(2, 2, 2, 2)
+    I[1, 1, 1, 1] = 1
+    I[1, 1, 2, 2] = 1
+    I[2, 2, 1, 1] = 1
+    I[2, 2, 2, 2] = 1
     @einsum res[q1, q2] := I[a, q1, c, q2] * ψ1[a] * ψ2[c]
     @test reshape(res, 4) == [0, 0, 0, 1]
 
-    G = zeros(2,2,2,2)
+    G = zeros(2, 2, 2, 2)
     G[1, 2, 1, 1] = 1
     G[2, 1, 1, 1] = 1
     G[1, 2, 2, 2] = 1
