@@ -72,7 +72,7 @@ function split_tensor(
     bond_dim::Integer,
 )
     A_new = reshape(A, left_axis_dim, right_axis_dim)
-    next, s, V_dag = svd(A_new, full=true)
+    next, s, V_dag = svd(A_new, full = true)
     V = conj(transpose(V_dag))
     V = V[1:min(size(V)[1], bond_dim), :]
     s = truncate_and_renormalize(s, bond_dim)

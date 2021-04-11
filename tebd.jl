@@ -37,21 +37,22 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
         right_site = ψ.sites[i]
         local evolved::Array{<:Number}
 
-        if i == N-1
+        if i == N - 1
             left_site = ψ.sites[i+1]
         else
             left_site = previous_right_site
         end
 
         # Left edge
-        if i == N-1
-            # Middle pairs
+        if i == N - 1
             @einsum block[q1, q2, right] := left_site[q1, chi] * right_site[chi, q2, right]
             @einsum evolved[q1, q2, right] := block[a, b, right] * G[a, q1, b, q2]
             _, new_left_site, new_right_site =
                 split_tensor(evolved, 2, 2 * ψ.bond_dim, ψ.bond_dim)
             push!(updated_sites, new_left_site)
             previous_right_site = reshape(new_right_site, size(right_site)...)
+
+        # Middle pairs
         elseif i > 1
             @einsum block[left, q1, q2, right] :=
                 left_site[left, q1, chi] * right_site[chi, q2, right]
@@ -69,6 +70,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
                 ),
             )
             previous_right_site = reshape(new_right_site, size(right_site)...)
+
         # Right edge
         elseif i == 1
             @einsum block[left, q1, q2] := left_site[left, q1, chi] * right_site[chi, q2]
