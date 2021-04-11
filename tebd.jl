@@ -43,7 +43,6 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             left_site = previous_right_site
         end
 
-        # Left edge
         if i == N - 1
             @einsum block[q1, q2, right] := left_site[q1, chi] * right_site[chi, q2, right]
             @einsum evolved[q1, q2, right] := block[a, b, right] * G[a, q1, b, q2]
@@ -52,7 +51,6 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             push!(updated_sites, new_left_site)
             previous_right_site = reshape(new_right_site, size(right_site)...)
 
-        # Middle pairs
         elseif i > 1
             @einsum block[left, q1, q2, right] :=
                 left_site[left, q1, chi] * right_site[chi, q2, right]
@@ -71,7 +69,6 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             )
             previous_right_site = reshape(new_right_site, size(right_site)...)
 
-        # Right edge
         elseif i == 1
             @einsum block[left, q1, q2] := left_site[left, q1, chi] * right_site[chi, q2]
             @einsum evolved[left, q1, q2] := block[left, a, b] * G[a, q1, b, q2]
