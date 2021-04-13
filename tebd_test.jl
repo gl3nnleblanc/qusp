@@ -6,6 +6,7 @@ include("./tebd.jl")
 using .TimeEvolvingBlockDecimation
 using .TimeEvolvingBlockDecimation.MatrixProductState
 
+
 @testset "Einsum Tests" begin
     ψ1 = [0; 1]
     ψ2 = [0; 1]
@@ -21,11 +22,51 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     ]
     G = reshape(X ⊗ Y, 2, 2, 2, 2)
 
+    # Correct index order for 2-qubit block contraction
+    @einsum res[q1, q2] := G[q1, q2, b, a] * ψ1[a] * ψ2[b]
+    @test reshape(res, 4) == (X ⊗ Y) * ψ
+    # Degree of freedom in index order
     @einsum res[q1, q2] := G[q1, q2, a, b] * ψ1[a] * ψ2[b]
     @test reshape(res, 4) == (X ⊗ Y) * ψ
-
-    @einsum res[q1, q2] := ψ1[a] * ψ2[b] * G[a, b, q1, q2]
+    # Incorrect order
+    @einsum res[q1, q2] := G[a, b, q1, q2] * ψ1[a] * ψ2[b]
     @test reshape(res, 4) != (X ⊗ Y) * ψ
+
+    # Fixed random local contraction on two sites
+    A = [0.293865 0.887788;
+         0.191751 0.2021]
+    B = [0.835162 0.797031;
+         0.292658 0.0414362]
+    ψ_rand1 = [0.0497384;
+          0.8757355]
+    ψ_rand2 = [0.6306069;
+          0.360918]
+    ψ = ψ_rand1 ⊗ ψ_rand2
+    G = A ⊗ B
+    res_m = G * ψ
+    G = reshape(G, 2, 2, 2, 2)
+    @einsum res_t[q1, q2] := G[q1, q2, b, a] * ψ_rand1[a] * ψ_rand2[b]
+    for e in (res_m - reshape(res_t, 4))
+        @test e < 1e-10
+    end
+
+    # Fixed random block + local contraction on two sites:
+    #     ψ = C * (A ⊗ B) * ψ_0
+    A = [0.443606 0.629362;
+         0.259218 0.650738]
+    B = [0.855656 0.447434;
+         0.170226 0.680784]
+    C = [0.60382 0.698733 0.242626 0.473168;
+         0.683629 0.141109 0.327527 0.183103;
+         0.956508 0.0732721 0.741199 0.780935;
+         0.842576 0.616262 0.217417 0.848626]
+    ψ = ψ_rand1 ⊗ ψ_rand2
+    res_m = C * (A ⊗ B) * ψ
+    C_t = reshape(C, 2, 2, 2, 2)
+    @einsum res_t[q1, q2] := C_t[q1, q2, d, c] * B[d, b] * A[c, a] * ψ_rand1[a] * ψ_rand2[b]
+    for e in (res_m - reshape(res_t, 4))
+        @test e < 1e-10
+    end
 
     I = zeros(2, 2, 2, 2)
     I[1, 1, 1, 1] = 1
@@ -41,9 +82,9 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     G[1, 2, 2, 2] = 1
     G[2, 1, 2, 2] = 1
     @einsum res[q1, q2] := G[a, q1, c, q2] * ψ1[a] * ψ2[c]
-    println(res)
     @test reshape(transpose(res), 4) == [0, 1, 0, 0]
 end
+
 @testset "Time Evolving Block Decimation Tests" begin
     ⊗ = kron
     σ_x = [
@@ -79,9 +120,9 @@ end
         return interaction_term + local_term
     end
     @testset "Block Decimation" begin
-        sites = 3
+        sites = 4
         ψ = zeros(ComplexF32, (2 for _ = 1:sites)...)
-        ψ[2, 2, 2] = 1
+        ψ[2, 2, 2, 2] = 1
 
         ψ /= sqrt(dot(ψ, ψ))
         ψ_mps = mps(ψ)
