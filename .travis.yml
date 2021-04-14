@@ -1,0 +1,11 @@
+language: julia
+
+jobs:
+  include:
+    - stage: "Testing"
+      julia: 1.5.3
+      os: linux
+      script:
+        - julia --project=. test/test_mps.jl
+        - julia --project=. test/test_tebd.jl
+      after_success: skip
