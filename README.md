@@ -8,13 +8,12 @@
 * An implementation of matrix product states, supporting
 	- constructing one from any initial tensor and specified bond dimension
 	- contraction back to a tensor of high (tensor-)rank
-	- time evolving block decimation (WIP)
+	- time evolving block decimation
 
 ## TODO
 
 * TEBD
-	- fix failing test
-	- add coverage
+	- Add tests for 2-local interaction term
 	- add visualizations
 * Examples to add
 	- classification [1]
