@@ -1,4 +1,5 @@
 # PDRP 2021
+[![Build Status](https://www.travis-ci.com/gl3nnleblanc/pdrp2021.svg?branch=master)](https://www.travis-ci.com/gl3nnleblanc/pdrp2021)
 ## Overview
 
  This is a sanbox for the physics [directed reading program](https://berkeleyphysicsdrp.wixsite.com/physicsberkeleydrp) during Spring '21. This project (including this README) is a WIP.
