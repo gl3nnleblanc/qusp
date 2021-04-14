@@ -1,16 +1,16 @@
 module MatrixProductState
 
-export MPS, mps, contract_mps
+export MPS, mps, contract_mps, split_tensor
 # A basic MPS calculation
 using LinearAlgebra
-
 
 """
     A wrapper type for a matrix product state.
 """
 mutable struct MPS
     # TODO: support contraction with another tensor
-    sites::Array{Array{Any}}
+    sites::Array{Array{<:Number}}
+    bond_dim::Integer
 end
 
 
@@ -42,7 +42,10 @@ Truncate vector of singular values and renormalize.
 """
 function truncate_and_renormalize(s, bond_dim)
     original_norm = sqrt(dot(s, s))
-    s = s[1:(length(s) < bond_dim ? end : bond_dim)]
+    if original_norm == 0
+        return s[1:min(length(s), bond_dim)]
+    end
+    s = s[1:min(length(s), bond_dim)]
     s *= original_norm / sqrt(dot(s, s))
     return s
 end
@@ -62,9 +65,14 @@ dimension `bond_dim`.
 
 Returns outgoing edge dimension, left matrix, right matrix.
 """
-function split_tensor(A, left_axis_dim, right_axis_dim, bond_dim)
+function split_tensor(
+    A::Array{<:Number},
+    left_axis_dim::Integer,
+    right_axis_dim::Integer,
+    bond_dim::Integer,
+)
     A_new = reshape(A, left_axis_dim, right_axis_dim)
-    next, s, V_dag = svd(A_new)
+    next, s, V_dag = svd(A_new, full = true)
     V = conj(transpose(V_dag))
     V = V[1:min(size(V)[1], bond_dim), :]
     s = truncate_and_renormalize(s, bond_dim)
@@ -118,7 +126,7 @@ function mps(A, bond_dim = 2)
     _, next, V = split_tensor(next, 2, prev_axis_dim, bond_dim)
     push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next)
-    return MPS(sites)
+    return MPS(sites, bond_dim)
 end
 
 end # module
