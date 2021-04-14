@@ -8,6 +8,6 @@ jobs:
       script:
         - ls
         - ls test/
-        - julia test/test_mps.jl
-        - julia test/test_tebd.jl
+        - julia test/mps_test.jl
+        - julia test/tebd_test.jl
       after_success: skip
