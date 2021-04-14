@@ -1,8 +1,11 @@
-# PDRP 2021
+# PDRP 2021 - QuSP
+
+**Qu**antum **S**imulation **P**layground
+
 [![Build Status](https://www.travis-ci.com/gl3nnleblanc/pdrp2021.svg?branch=master)](https://www.travis-ci.com/gl3nnleblanc/pdrp2021)
 ## Overview
 
- This is a sanbox for the physics [directed reading program](https://berkeleyphysicsdrp.wixsite.com/physicsberkeleydrp) during Spring '21. This project (including this README) is a WIP.
+ This is a sanbox for the physics [directed reading program](https://berkeleyphysicsdrp.wixsite.com/physicsberkeleydrp) during Spring '21. The focus of this code is on quantum simulation with matrix product states. This project (including this README) is a WIP.
 
 ## Features
 
@@ -14,7 +17,7 @@
 ## TODO
 
 * TEBD
-	- Add tests for 2-local interaction term
+	- add tests for 2-local interaction term
 	- add visualizations
 * Examples to add
 	- classification [1]
