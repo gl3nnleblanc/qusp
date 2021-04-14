@@ -118,7 +118,7 @@ end
     ]
     σ_z = [
         1 0
-        0 1
+        0 -1
     ]
     ising = Hamiltonian(σ_z ⊗ σ_z, σ_x)
     function ising_matrix(sites::Integer, local_only::Bool = false)
@@ -186,5 +186,26 @@ end
         end
         angles = [π / 17, π / 6, π / 3, π / 2, π, 2 * π]
         @test all(map(do_local_spin_test, angles))
+
+        # Fixed random test with interaction term
+        # 3 sites
+        ψ = [
+            0.3845365570336037
+            0.7266090779430696
+            0.9145958504643772
+            0.18064922219424306
+            0.5427245165195134
+            0.6423380082696535
+            0.49916676166641705
+            0.4171892940478734
+        ]
+        ψ /= norm(ψ)
+        ψ_t = reshape(ψ, 2, 2, 2)
+        ψ_mps = mps(ψ_t)
+        ising = Hamiltonian(σ_z ⊗ σ_z, σ_x)
+        H = ising_matrix(3)
+        ϕ_res = exp(H * π / 100 * 1im) * ψ
+        ψ_res = reshape(contract_mps(block_evolve(ψ_mps, ising, π / 100 * 1im)), 8)
+        # TODO -- how can we make this equal?
     end
 end
