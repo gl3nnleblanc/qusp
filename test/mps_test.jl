@@ -1,7 +1,7 @@
 using LinearAlgebra
 using Test
 
-include("./mps.jl")
+include("../src/mps.jl")
 using .MatrixProductState
 
 @testset "Matrix Product State Tests" begin

@@ -2,7 +2,7 @@ using LinearAlgebra
 using Einsum
 using Test
 
-include("./tebd.jl")
+include("../src/tebd.jl")
 using .TimeEvolvingBlockDecimation
 using .TimeEvolvingBlockDecimation.MatrixProductState
 
