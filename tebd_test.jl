@@ -59,7 +59,7 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     end
 
     # Fixed random block + local contraction on two sites:
-    #     ψ = C * (A ⊗ B) * ψ_0
+    #     ψ = C * (A ⊗ B) * ψ_0 (no entanglement originally)
     A = [
         0.443606 0.629362
         0.259218 0.650738
@@ -78,6 +78,17 @@ using .TimeEvolvingBlockDecimation.MatrixProductState
     res_m = C * (A ⊗ B) * ψ
     C_t = reshape(C, 2, 2, 2, 2)
     @einsum res_t[q1, q2] := C_t[q1, q2, d, c] * B[d, b] * A[c, a] * ψ_rand1[a] * ψ_rand2[b]
+    for e in (res_m - reshape(res_t, 4))
+        @test e < 1e-10
+    end
+
+    # Fixed random block + local contraction on two sites:
+    #     ψ = C * (A ⊗ B) * ψ_0 (entangled start)
+    ψ = [0.692; 0.6442; 0.169; 0.873]
+    res_m = C * (A ⊗ B) * ψ
+    ψ = reshape(ψ, 2, 2)
+    C_t = reshape(C, 2, 2, 2, 2)
+    @einsum res_t[q1, q2] := C_t[q1, q2, d, c] * B[d, b] * A[c, a] * ψ[a, b]
     for e in (res_m - reshape(res_t, 4))
         @test e < 1e-10
     end
@@ -110,7 +121,7 @@ end
         0 1
     ]
     ising = Hamiltonian(σ_z ⊗ σ_z, σ_x)
-    function ising_matrix(sites::Integer)
+    function ising_matrix(sites::Integer, local_only::Bool = false)
         I = [
             1 0
             0 1
@@ -131,21 +142,20 @@ end
             pauli_string[i+1] = σ_z
             interaction_term += reduce(kron, pauli_string)
         end
+        if local_only
+            return local_term
+        end
         return interaction_term + local_term
     end
     @testset "Block Decimation" begin
-        sites = 4
+        # Apply identity to |00...01⟩
+        sites = 10
         ψ = zeros(ComplexF32, (2 for _ = 1:sites)...)
-        ψ[2, 2, 2, 2] = 1
+        ψ[(2 for _ = 1:sites)...] = 1
 
         ψ /= sqrt(dot(ψ, ψ))
         ψ_mps = mps(ψ)
-        ψ_int = block_evolve(ψ_mps, ising, 0)
-        for site in ψ_int.sites
-            println(site)
-        end
         ψ_res = reshape(contract_mps(block_evolve(ψ_mps, ising, 0)), 2^sites)
-        println(ψ_res)
 
         ϕ = zeros(ComplexF32, 2^sites)
         ϕ[2^sites] = 1
@@ -156,5 +166,25 @@ end
 
         @test dot(ψ_res, ϕ_res) == 1
 
+        # Apply only local interactions to |00...01⟩
+        function do_local_spin_test(angle)
+            ising = Hamiltonian(0 * (σ_z ⊗ σ_z), σ_x)
+            sites = 5
+            ψ = zeros(ComplexF32, (2 for _ = 1:sites)...)
+            ψ[(2 for _ = 1:sites)...] = 1
+
+            ψ /= sqrt(dot(ψ, ψ))
+            ψ_mps = mps(ψ)
+            ψ_res = reshape(contract_mps(block_evolve(ψ_mps, ising, angle * 1im)), 2^sites)
+
+            ϕ = zeros(ComplexF32, 2^sites)
+            ϕ[2^sites] = 1
+            ϕ /= sqrt(dot(ϕ, ϕ))
+            H = ising_matrix(sites, true)
+            ϕ_res = exp(H * angle * 1im) * ϕ
+            return abs(dot(ψ_res, ϕ_res)) - 1 < 1e-10
+        end
+        angles = [π / 17, π / 6, π / 3, π / 2, π, 2 * π]
+        @test all(map(do_local_spin_test, angles))
     end
 end
