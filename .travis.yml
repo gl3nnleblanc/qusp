@@ -6,8 +6,7 @@ jobs:
       julia: 1.5.3
       os: linux
       script:
-        - ls
-        - ls test/
+        - julia -e 'using Pkg; Pkg.instantiate()'
         - julia test/mps_test.jl
         - julia test/tebd_test.jl
       after_success: skip
