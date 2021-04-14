@@ -2,3 +2,8 @@ name = "QuSP"
 uuid = "907b9114-6ae2-43b8-a065-a90352e5d93c"
 authors = ["Glenn LeBlanc <g.leblanc135@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+Einsum = "b7d42ee7-0b51-5a75-98ca-779d3107e4c0"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
