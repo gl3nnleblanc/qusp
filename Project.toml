@@ -1,6 +1,6 @@
 name = "QuSP"
 uuid = "907b9114-6ae2-43b8-a065-a90352e5d93c"
-authors = ["Glenn LeBlanc <g.leblanc135@gmail.com>"]
+authors = ["Glenn LeBlanc <g.leblanc135@gmail.com>", "Karthik Siva"]
 version = "0.1.0"
 
 [deps]
