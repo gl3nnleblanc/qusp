@@ -3,6 +3,7 @@ module MatrixProductState
 export MPS, mps, contract_mps, split_tensor
 # A basic MPS calculation
 using LinearAlgebra
+using Einsum
 
 """
     A wrapper type for a matrix product state.
@@ -20,18 +21,21 @@ end
 function contract_mps(m::MPS)
     sites = m.sites
     rank = length(sites)
-    axis_dim = div(length(sites[2]), 2)
-    intermediate = reshape(sites[2], axis_dim, 2) * sites[1]
-    for i = 2:rank-2
-        axis_dim = size(sites[i+1])[3]
-        left_axis_dim = div(length(sites[i+1]), axis_dim)
-        right_axis_dim = div(length(intermediate), axis_dim)
-        intermediate =
-            reshape(sites[i+1], left_axis_dim, axis_dim) *
-            reshape(intermediate, axis_dim, right_axis_dim)
+
+    right_edge = sites[1]
+    next = sites[2]
+    @einsum block[left_bond, q2, q1] := next[left_bond, q2, χ] * right_edge[χ, q1]
+    for i = 3:rank-1
+        bond_dim = size(block)[1]
+        prev = reshape(block, bond_dim, :)
+        next = sites[i]
+        @einsum block[left_bond, qi, qs] := next[left_bond, qi, χ] * prev[χ, qs]
     end
-    res = sites[rank] * reshape(intermediate, 2, 2^(rank - 1))
-    return reshape(res, (2 for _ = 1:rank)...)
+    bond_dim = size(block)[1]
+    prev = reshape(block, bond_dim, :)
+    next = sites[rank]
+    @einsum block[qi, qs] := next[qi, χ] * prev[χ, qs]
+    return reshape(block, (2 for _=1:rank)...)
 end
 
 
