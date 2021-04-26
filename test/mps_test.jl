@@ -14,6 +14,37 @@ using .MatrixProductState
         catch err
         end
         @test err isa DomainError
+        A = zeros(2, 2, 2)
+        A_mps = mps(A)
+        err = nothing
+        try
+            A_mps = set_orthogonality(A_mps, 4)
+        catch err
+        end
+        @test err isa DomainError
+        A = reshape(
+            [
+                0.464654 0.594944
+                0.0734789 0.514704
+                0.118756 0.799922
+                0.142388 0.622209
+                0.0820784 0.245697
+                0.143912 0.291454
+                0.967784 0.382256
+                0.273797 0.880877
+            ],
+            2,
+            2,
+            2,
+            2,
+        )
+        A_mps = mps(A)
+        B_mps = mps(A)
+        for i = 1:3
+            A_mps = set_orthogonality(A_mps, i)
+            @test round.(contract_mps(A_mps), digits = 5) ==
+                  round.(contract_mps(B_mps), digits = 5)
+        end
     end
     @testset "Orthogonality Center" begin
         # Output should be entirely right normal except for last site
@@ -26,14 +57,14 @@ using .MatrixProductState
         A_mps = mps(A)
         middle_site = A_mps.sites[2]
         @einsum res[i, j] := middle_site[i, a, b] * middle_site[j, a, b]
-        @test round.(res, digits=10) == [1 0; 0 1]
+        @test round.(res, digits = 10) == [1 0; 0 1]
 
-        A = rand((2 for _=1:10)...)
+        A = rand((2 for _ = 1:10)...)
         A_mps = mps(A)
-        for i=2:9
+        for i = 2:9
             site = A_mps.sites[i]
             @einsum res[i, j] := site[i, a, b] * site[j, a, b]
-            @test round.(res, digits=7) == [1 0; 0 1]
+            @test round.(res, digits = 7) == [1 0; 0 1]
         end
     end
     @testset "Contraction" begin

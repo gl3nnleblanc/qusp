@@ -1,6 +1,6 @@
 module MatrixProductState
 
-export MPS, mps, contract_mps, split_tensor
+export MPS, mps, contract_mps, split_tensor, set_orthogonality
 # An MPS wrapper and associated functions
 using LinearAlgebra
 using Einsum
@@ -20,8 +20,57 @@ end
 """
     Moves the orthogonality center.
 """
-function set_orthogonality(site::Integer, m::MPS)
+function set_orthogonality(m::MPS, site::Integer)
+    sites = m.sites
     curr_orthogonality_site = m.orthogonality_site
+    N = length(m.sites)
+    if !(site in 1:N)
+        throw(DomainError(site, "Choose a site within bounds 1 to " * string(N)))
+    end
+
+    if site == curr_orthogonality_site
+        return
+    end
+
+    if site > curr_orthogonality_site
+        # Move O.C. from right to left
+        # i = curr, curr + 1, curr + 2, etc. <--
+        for i = curr_orthogonality_site:site
+            active_site = sites[i]
+            left_edge_dim = first(size(active_site))
+            active_size = size(active_site)
+            L, Q = lq(reshape(active_site, left_edge_dim, :))
+            sites[i] = reshape(Q, active_size...)
+            if i < N
+                next = sites[i+1]
+                @einsum updated[χ_l, q, χ_r] := next[χ_l, q, χ] * L[χ, χ_r]
+                sites[i+1] = updated
+            else
+                # Do nothing if at edge
+                sites[i] = active_site
+            end
+        end
+    else
+        # Move O.C. from left to right
+        for i = curr_orthogonality_site:-1:site
+            active_site = sites[i]
+            right_edge_dim = last(size(active_site))
+            active_size = size(active_site)
+            Q, R = qr(reshape(active_site, :, right_edge_dim))
+            if last(size(R)) < last(size(Q))
+                Q = Q[:, 1:last(size(R))]
+            end
+            sites[i] = convert(Array{Float64}, reshape(Q, active_size...))
+            if i > 1
+                next = sites[i-1]
+                @einsum updated[χ_l, q, χ_r] := R[χ_l, χ] * next[χ, q, χ_r]
+                sites[i-1] = updated
+            else
+                sites[i] = active_site
+            end
+        end
+    end
+    return MPS(sites, m.bond_dim, site)
 end
 
 
@@ -45,7 +94,7 @@ function contract_mps(m::MPS)
     prev = reshape(block, bond_dim, :)
     next = sites[rank]
     @einsum block[qi, qs] := next[qi, χ] * prev[χ, qs]
-    return reshape(block, (2 for _=1:rank)...)
+    return reshape(block, (2 for _ = 1:rank)...)
 end
 
 
