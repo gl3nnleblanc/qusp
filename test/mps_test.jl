@@ -1,3 +1,4 @@
+using Einsum
 using LinearAlgebra
 using Test
 
@@ -13,6 +14,27 @@ using .MatrixProductState
         catch err
         end
         @test err isa DomainError
+    end
+    @testset "Orthogonality Center" begin
+        # Output should be entirely right normal except for last site
+        A = ones(2, 2, 2)
+        A[1, 1, 1] = 0
+        A[1, 2, 2] = 0
+        A[2, 1, 2] = 0
+        A[2, 2, 1] = 0
+        A[1, 1, 2] = 2
+        A_mps = mps(A)
+        middle_site = A_mps.sites[2]
+        @einsum res[i, j] := middle_site[i, a, b] * middle_site[j, a, b]
+        @test round.(res, digits=10) == [1 0; 0 1]
+
+        A = rand((2 for _=1:10)...)
+        A_mps = mps(A)
+        for i=2:9
+            site = A_mps.sites[i]
+            @einsum res[i, j] := site[i, a, b] * site[j, a, b]
+            @test round.(res, digits=7) == [1 0; 0 1]
+        end
     end
     @testset "Contraction" begin
         # First simple test

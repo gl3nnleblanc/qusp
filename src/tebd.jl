@@ -83,7 +83,7 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             push!(updated_sites, reshape(new_right_site, size(right_site)...))
         end
     end
-    return MPS(reverse(updated_sites), ψ.bond_dim)
+    return MPS(reverse(updated_sites), ψ.bond_dim, 1)
 end
 
 end # module

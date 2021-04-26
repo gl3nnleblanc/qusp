@@ -1,9 +1,10 @@
 module MatrixProductState
 
 export MPS, mps, contract_mps, split_tensor
-# A basic MPS calculation
+# An MPS wrapper and associated functions
 using LinearAlgebra
 using Einsum
+
 
 """
     A wrapper type for a matrix product state.
@@ -12,11 +13,20 @@ mutable struct MPS
     # TODO: support contraction with another tensor
     sites::Array{Array{<:Number}}
     bond_dim::Integer
+    orthogonality_site::Integer
 end
 
 
 """
-    Contracts the MPS into a single tensor.
+    Moves the orthogonality center.
+"""
+function set_orthogonality(site::Integer, m::MPS)
+    curr_orthogonality_site = m.orthogonality_site
+end
+
+
+"""
+    Contracts the MPS into a single tensor. Moves right to left along chain.
 """
 function contract_mps(m::MPS)
     sites = m.sites
@@ -24,12 +34,12 @@ function contract_mps(m::MPS)
 
     right_edge = sites[1]
     next = sites[2]
-    @einsum block[left_bond, q2, q1] := next[left_bond, q2, χ] * right_edge[χ, q1]
+    @einsum block[χ_out, q2, q1] := next[χ_out, q2, χ] * right_edge[χ, q1]
     for i = 3:rank-1
         bond_dim = size(block)[1]
         prev = reshape(block, bond_dim, :)
         next = sites[i]
-        @einsum block[left_bond, qi, qs] := next[left_bond, qi, χ] * prev[χ, qs]
+        @einsum block[χ_out, qi, qs] := next[χ_out, qi, χ] * prev[χ, qs]
     end
     bond_dim = size(block)[1]
     prev = reshape(block, bond_dim, :)
@@ -130,7 +140,7 @@ function mps(A, bond_dim = 2)
     _, next, V = split_tensor(next, 2, prev_axis_dim, bond_dim)
     push!(sites, reshape(V, 2, 2, length(V) ÷ 4))
     push!(sites, next)
-    return MPS(sites, bond_dim)
+    return MPS(sites, bond_dim, rank)
 end
 
 end # module
