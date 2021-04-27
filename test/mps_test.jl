@@ -1,5 +1,6 @@
 using Einsum
 using LinearAlgebra
+using Debugger
 using Test
 
 include("../src/mps.jl")
@@ -40,12 +41,68 @@ using .MatrixProductState
         )
         A_mps = mps(A)
         B_mps = mps(A)
-        for i = 1:3
-            B_mps = set_orthogonality(A_mps, i)
-            @test round.(contract_mps(A_mps), digits = 5) ==
-                  round.(contract_mps(B_mps), digits = 5)
-            @test A_mps.sites != B_mps.sites
+        # A:
+        # .-<-<-<
+        # | | | |
+        #
+        # B:
+        # >->->-.
+        # | | | |
+        B_mps = set_orthogonality(A_mps, 1)
+        @test round.(contract_mps(A_mps), digits = 5) ==
+              round.(contract_mps(B_mps), digits = 5)
+        @test A_mps.sites != B_mps.sites
+        # Ensure each left-normal site in B is actually left-normal
+        #     Middle 3-leg tensors
+        for i=2:3
+            site = B_mps.sites[i]
+            @einsum res[i,j] := site[a, b, i] * site[a, b, j]
+            @test round.(res, digits = 8) == [1 0; 0 1]
         end
+        # Left edge 2-leg tensor
+        res = B_mps.sites[4] * transpose(B_mps.sites[4])
+        @test round.(res, digits = 8) == [1 0; 0 1]
+        # A:
+        # .-<-<-<
+        # | | | |
+        #
+        # C:
+        # >->-.-<
+        # | | | |
+        C_mps = set_orthogonality(A_mps, 2)
+        @test round.(contract_mps(A_mps), digits = 5) ==
+              round.(contract_mps(C_mps), digits = 5)
+        @test A_mps.sites != C_mps.sites
+        # Left and right edge 2-leg tensors
+        for i in [1, 4]
+            res = C_mps.sites[i] * transpose(C_mps.sites[i])
+            @test round.(res, digits = 8) == [1 0; 0 1]
+        end
+        # Second from left left-normal 3-leg tensor
+        site = C_mps.sites[3]
+        @einsum res[i,j] := site[a, b, i] * site[a, b, j]
+        @test round.(res, digits = 8) == [1 0; 0 1]
+        # A:
+        # .-<-<-<
+        # | | | |
+        #
+        # D:
+        # >-.-<-<
+        # | | | |
+        D_mps = set_orthogonality(A_mps, 3)
+        @test round.(contract_mps(A_mps), digits = 5) ==
+              round.(contract_mps(D_mps), digits = 5)
+        @test A_mps.sites != D_mps.sites
+        # Left and right edge 2-leg tensors
+        for i in [1, 4]
+            res = D_mps.sites[i] * transpose(D_mps.sites[i])
+            @test round.(res, digits = 8) == [1 0; 0 1]
+        end
+        # Second from right right-normal 3-leg tensor
+        site = D_mps.sites[2]
+        @einsum res[i,j] := site[i, a, b] * site[j, a, b]
+        @test round.(res, digits = 8) == [1 0; 0 1]
+
     end
     @testset "Orthogonality Center" begin
         # Output should be entirely right normal except for last site

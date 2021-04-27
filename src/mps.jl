@@ -35,7 +35,7 @@ function set_orthogonality(m::MPS, site::Integer)
     if site > curr_orthogonality_site
         # Move O.C. from right to left
         # i = curr, curr + 1, curr + 2, etc. <--
-        for i = curr_orthogonality_site:site
+        for i = curr_orthogonality_site:site-1
             active_site = sites[i]
             left_edge_dim = first(size(active_site))
             active_size = size(active_site)
@@ -55,7 +55,8 @@ function set_orthogonality(m::MPS, site::Integer)
         end
     else
         # Move O.C. from left to right
-        for i = curr_orthogonality_site:-1:site
+        # i = curr, curr - 1, curr - 2, etc. -->
+        for i = curr_orthogonality_site:-1:site+1
             active_site = sites[i]
             right_edge_dim = last(size(active_site))
             active_size = size(active_site)
@@ -67,6 +68,10 @@ function set_orthogonality(m::MPS, site::Integer)
             if i > 1
                 next = sites[i-1]
                 @einsum updated[χ_l, q, χ_r] := R[χ_l, χ] * next[χ, q, χ_r]
+                # Squash (n X n X 1) -> (n X n) for edge
+                if i == 2
+                    updated = reshape(updated, size(updated)[1:2]...)
+                end
                 sites[i-1] = updated
             else
                 sites[i] = active_site
