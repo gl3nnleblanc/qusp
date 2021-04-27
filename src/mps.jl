@@ -21,7 +21,7 @@ end
     Moves the orthogonality center.
 """
 function set_orthogonality(m::MPS, site::Integer)
-    sites = m.sites
+    sites = copy(m.sites)
     curr_orthogonality_site = m.orthogonality_site
     N = length(m.sites)
     if !(site in 1:N)
@@ -40,7 +40,10 @@ function set_orthogonality(m::MPS, site::Integer)
             left_edge_dim = first(size(active_site))
             active_size = size(active_site)
             L, Q = lq(reshape(active_site, left_edge_dim, :))
-            sites[i] = reshape(Q, active_size...)
+            if first(size(L)) < first(size(Q))
+                Q = Q[1:first(size(L)), :]
+            end
+            sites[i] = convert(Array{Float64}, reshape(Q, active_size...))
             if i < N
                 next = sites[i+1]
                 @einsum updated[χ_l, q, χ_r] := next[χ_l, q, χ] * L[χ, χ_r]

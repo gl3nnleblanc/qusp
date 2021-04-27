@@ -41,9 +41,10 @@ using .MatrixProductState
         A_mps = mps(A)
         B_mps = mps(A)
         for i = 1:3
-            A_mps = set_orthogonality(A_mps, i)
+            B_mps = set_orthogonality(A_mps, i)
             @test round.(contract_mps(A_mps), digits = 5) ==
                   round.(contract_mps(B_mps), digits = 5)
+            @test A_mps.sites != B_mps.sites
         end
     end
     @testset "Orthogonality Center" begin
