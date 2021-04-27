@@ -123,7 +123,53 @@ using .MatrixProductState
         site = D_mps.sites[2]
         @einsum res[i,j] := site[i, a, b] * site[j, a, b]
         @test round.(res, digits = 8) == [1 0; 0 1]
-
+        # D:
+        # >-.-<-<
+        # | | | |
+        #
+        # E:
+        # >->-.-<
+        # | | | |
+        E_mps = set_orthogonality(D_mps, 2)
+        # Test numerical stability: safe up to approx. 12 digits
+        @test round.(contract_mps(A_mps), digits = 12) ==
+              round.(contract_mps(D_mps), digits = 12)
+        @test round.(contract_mps(A_mps), digits = 12) ==
+              round.(contract_mps(E_mps), digits = 12)
+        @test A_mps.sites != E_mps.sites
+        @test D_mps.sites != E_mps.sites
+        # Left and right edge 2-leg tensors
+        for i in [1, 4]
+            res = E_mps.sites[i] * transpose(E_mps.sites[i])
+            @test round.(res, digits = 8) == [1 0; 0 1]
+        end
+        # Second from left left-normal 3-leg tensor
+        site = E_mps.sites[3]
+        @einsum res[i,j] := site[a, b, i] * site[a, b, j]
+        @test round.(res, digits = 8) == [1 0; 0 1]
+        # D:
+        # >-.-<-<
+        # | | | |
+        #
+        # F:
+        # .-<-<-<
+        # | | | |
+        F_mps = set_orthogonality(D_mps, 4)
+        # Test numerical stability: safe up to approx. 12 digits
+        @test round.(contract_mps(A_mps), digits = 12) ==
+              round.(contract_mps(D_mps), digits = 12)
+        @test round.(contract_mps(A_mps), digits = 12) ==
+              round.(contract_mps(F_mps), digits = 12)
+        @test D_mps.sites != F_mps.sites
+        # Ensure each right-normal site in B is actually right-normal
+        #     Middle 3-leg tensors
+        for i=2:3
+            site = F_mps.sites[i]
+            @einsum res[i,j] := site[i, a, b] * site[j, a, b]
+            @test round.(res, digits = 8) == [1 0; 0 1]
+        end
+        res = F_mps.sites[1] * transpose(F_mps.sites[1])
+        @test round.(res, digits = 8) == [1 0; 0 1]
     end
     @testset "Contraction" begin
         # First simple test

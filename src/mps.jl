@@ -44,14 +44,13 @@ function set_orthogonality(m::MPS, site::Integer)
                 Q = Q[1:first(size(L)), :]
             end
             sites[i] = convert(Array{Float64}, reshape(Q, active_size...))
-            if i < N
-                next = sites[i+1]
+            next = sites[i+1]
+            if i != N - 1
                 @einsum updated[χ_l, q, χ_r] := next[χ_l, q, χ] * L[χ, χ_r]
-                sites[i+1] = updated
             else
-                # Do nothing if at edge
-                sites[i] = active_site
+                @einsum updated[q, χ_r] := next[q, χ] * L[χ, χ_r]
             end
+            sites[i+1] = updated
         end
     else
         # Move O.C. from left to right
@@ -65,17 +64,13 @@ function set_orthogonality(m::MPS, site::Integer)
                 Q = Q[:, 1:last(size(R))]
             end
             sites[i] = convert(Array{Float64}, reshape(Q, active_size...))
-            if i > 1
-                next = sites[i-1]
-                @einsum updated[χ_l, q, χ_r] := R[χ_l, χ] * next[χ, q, χ_r]
-                # Squash (n X n X 1) -> (n X n) for edge
-                if i == 2
-                    updated = reshape(updated, size(updated)[1:2]...)
-                end
-                sites[i-1] = updated
-            else
-                sites[i] = active_site
+            next = sites[i-1]
+            @einsum updated[χ_l, q, χ_r] := R[χ_l, χ] * next[χ, q, χ_r]
+            # Squash (n X n X 1) -> (n X n) for edge
+            if i == 2
+                updated = reshape(updated, size(updated)[1:2]...)
             end
+            sites[i-1] = updated
         end
     end
     return MPS(sites, m.bond_dim, site)
