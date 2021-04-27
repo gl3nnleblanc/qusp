@@ -29,7 +29,7 @@ function set_orthogonality(m::MPS, site::Integer)
     end
 
     if site == curr_orthogonality_site
-        return
+        return m
     end
 
     if site > curr_orthogonality_site

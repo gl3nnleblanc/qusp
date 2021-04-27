@@ -20,11 +20,12 @@ end
     Performs block evolution from left to right.
 """
 function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
+    N = length(ψ.sites)
+    ψ = set_orthogonality(ψ, N)
     updated_sites::Array{Array{<:Number}} = []
     interaction = reshape(exp(H.interaction * t), 2, 2, 2, 2)
     field = exp(H.field * t)
     half_field = exp(H.field * t / 2)
-    N = length(ψ.sites)
     # Left to Right
     local previous_right_site::Array{<:Number}
     for i = N-1:-1:1
