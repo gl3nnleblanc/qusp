@@ -1,6 +1,5 @@
 using Einsum
 using LinearAlgebra
-using Debugger
 using Test
 
 include("../src/mps.jl")
