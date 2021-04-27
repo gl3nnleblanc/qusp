@@ -75,9 +75,9 @@ using .MatrixProductState
         @test A_mps.sites != B_mps.sites
         # Ensure each left-normal site in B is actually left-normal
         #     Middle 3-leg tensors
-        for i=2:3
+        for i = 2:3
             site = B_mps.sites[i]
-            @einsum res[i,j] := site[a, b, i] * site[a, b, j]
+            @einsum res[i, j] := site[a, b, i] * site[a, b, j]
             @test round.(res, digits = 8) == [1 0; 0 1]
         end
         # Left edge 2-leg tensor
@@ -101,7 +101,7 @@ using .MatrixProductState
         end
         # Second from left left-normal 3-leg tensor
         site = C_mps.sites[3]
-        @einsum res[i,j] := site[a, b, i] * site[a, b, j]
+        @einsum res[i, j] := site[a, b, i] * site[a, b, j]
         @test round.(res, digits = 8) == [1 0; 0 1]
         # A:
         # .-<-<-<
@@ -121,7 +121,7 @@ using .MatrixProductState
         end
         # Second from right right-normal 3-leg tensor
         site = D_mps.sites[2]
-        @einsum res[i,j] := site[i, a, b] * site[j, a, b]
+        @einsum res[i, j] := site[i, a, b] * site[j, a, b]
         @test round.(res, digits = 8) == [1 0; 0 1]
         # D:
         # >-.-<-<
@@ -145,7 +145,7 @@ using .MatrixProductState
         end
         # Second from left left-normal 3-leg tensor
         site = E_mps.sites[3]
-        @einsum res[i,j] := site[a, b, i] * site[a, b, j]
+        @einsum res[i, j] := site[a, b, i] * site[a, b, j]
         @test round.(res, digits = 8) == [1 0; 0 1]
         # D:
         # >-.-<-<
@@ -163,13 +163,46 @@ using .MatrixProductState
         @test D_mps.sites != F_mps.sites
         # Ensure each right-normal site in B is actually right-normal
         #     Middle 3-leg tensors
-        for i=2:3
+        for i = 2:3
             site = F_mps.sites[i]
-            @einsum res[i,j] := site[i, a, b] * site[j, a, b]
+            @einsum res[i, j] := site[i, a, b] * site[j, a, b]
             @test round.(res, digits = 8) == [1 0; 0 1]
         end
         res = F_mps.sites[1] * transpose(F_mps.sites[1])
         @test round.(res, digits = 8) == [1 0; 0 1]
+
+        # Bigger random test
+        rank = 10
+        A = rand(ComplexF64, (2 for _ = 1:rank)...)
+        A_mps = mps(A)
+        B_mps = set_orthogonality(A_mps, 2)
+        right_edge = B_mps.sites[1]
+        @test round.(right_edge * conj(transpose(right_edge)), digits = 8) == [1 0; 0 1]
+        for i = 3:9
+            site = B_mps.sites[i]
+            conjugate = conj.(site)
+            @einsum res[i, j] := site[a, b, i] * conjugate[a, b, j]
+            @test round.(res, digits = 8) == [1 0; 0 1]
+        end
+        C_mps = set_orthogonality(B_mps, 7)
+        for i in [1, 10]
+            edge = B_mps.sites[i]
+            @test round.(edge * conj(transpose(edge)), digits = 8) == [1 0; 0 1]
+        end
+        # Right normal sites
+        for i = 2:6
+            site = C_mps.sites[i]
+            conjugate = conj.(site)
+            @einsum res[i, j] := conjugate[i, a, b] * site[j, a, b]
+            @test round.(res, digits = 8) == [1 0; 0 1]
+        end
+        # Left normal sites
+        for i = 8:9
+            site = C_mps.sites[i]
+            conjugate = conj.(site)
+            @einsum res[i, j] := site[a, b, i] * conjugate[a, b, j]
+            @test round.(res, digits = 8) == [1 0; 0 1]
+        end
     end
     @testset "Contraction" begin
         # First simple test

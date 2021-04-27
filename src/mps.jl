@@ -43,7 +43,7 @@ function set_orthogonality(m::MPS, site::Integer)
             if first(size(L)) < first(size(Q))
                 Q = Q[1:first(size(L)), :]
             end
-            sites[i] = convert(Array{Float64}, reshape(Q, active_size...))
+            sites[i] = convert(Array{}, reshape(Q, active_size...))
             next = sites[i+1]
             if i != N - 1
                 @einsum updated[χ_l, q, χ_r] := next[χ_l, q, χ] * L[χ, χ_r]
@@ -63,7 +63,7 @@ function set_orthogonality(m::MPS, site::Integer)
             if last(size(R)) < last(size(Q))
                 Q = Q[:, 1:last(size(R))]
             end
-            sites[i] = convert(Array{Float64}, reshape(Q, active_size...))
+            sites[i] = convert(Array{}, reshape(Q, active_size...))
             next = sites[i-1]
             @einsum updated[χ_l, q, χ_r] := R[χ_l, χ] * next[χ, q, χ_r]
             # Squash (n X n X 1) -> (n X n) for edge
