@@ -1,6 +1,6 @@
 module MatrixProductState
 
-export MPS, mps, contract_mps, split_tensor, set_orthogonality
+export MPS, mps, contract_mps, split_tensor, set_orthogonality, eval_local_op
 # An MPS wrapper and associated functions
 using LinearAlgebra
 using Einsum
@@ -74,6 +74,18 @@ function set_orthogonality(m::MPS, site::Integer)
         end
     end
     return MPS(sites, m.bond_dim, site)
+end
+
+
+"""
+    Evaluates the expectation of M at the specified site.
+"""
+function eval_local_op(m::MPS, M::Array{<:Number}, site::Integer)
+    m = set_orthogonality(m, site)
+    ψ = m.sites[site]
+    conj_ψ = conj.(ψ)
+    @einsum res := ψ[χ_l, α, χ_r] * M[α, β] * conj_ψ[χ_l, β, χ_r]
+    return res
 end
 
 

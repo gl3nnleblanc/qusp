@@ -240,4 +240,19 @@ using .MatrixProductState
         @test abs(dot(A, A)) - 1 < 1e-7
         @test abs(dot(A_mps, A_mps)) - 1 < 1e-7
     end
+    @testset "Local operator expectation" begin
+        # <σ_z>ᵩ for ϕ complex random
+        rank = 5
+        A = rand(ComplexF64, (2 for _ = 1:rank)...)
+        A = A / sqrt(dot(A, A))
+        A_mps = mps(A)
+        A_mps_tensor = contract_mps(A_mps)
+        σ_z = [1 0; 0 -1]
+        I = [1 0; 0 1]
+        conj_tensor = conj.(A_mps_tensor)
+        @einsum full_res :=
+            A_mps_tensor[a, b, α, c, d] * σ_z[α, β] * conj_tensor[a, b, β, c, d]
+        easy_res = eval_local_op(A_mps, σ_z, 3)
+        @test round(easy_res, digits = 12) == round(full_res, digits = 12)
+    end
 end
