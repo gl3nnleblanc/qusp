@@ -1,5 +1,5 @@
 using JuliaFormatter
 
-println("formatting...")
+println("Formatting...")
 format("../")
 println("Formatting done.")
