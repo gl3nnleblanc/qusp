@@ -7,7 +7,7 @@
 
  This is a sanbox for the physics [directed reading program](https://berkeleyphysicsdrp.wixsite.com/physicsberkeleydrp) during Spring '21. The focus of this code is on quantum simulation with matrix product states. This project (including this README) is a WIP.
 
- Check out the `examples` folder for an overview!
+ Check out the `examples` folder for some neat showcase notebooks!
 ## Features
 
 * An implementation of matrix product states, supporting
