@@ -182,10 +182,12 @@ end
             ϕ /= sqrt(dot(ϕ, ϕ))
             H = ising_matrix(sites, true)
             ϕ_res = exp(H * angle * 1im) * ϕ
-            return abs(dot(ψ_res, ϕ_res)) - 1 < 1e-10
+            return abs(abs(dot(ψ_res, ϕ_res)) - 1) < 1e-10
         end
         angles = [π / 17, π / 6, π / 3, π / 2, π, 2 * π]
-        @test all(map(do_local_spin_test, angles))
+        results = map(do_local_spin_test, angles)
+        println(results)
+        @test all(results)
 
         # Fixed random test with interaction term
         # 3 sites
