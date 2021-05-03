@@ -1,4 +1,4 @@
-<a href="/dev/svd.pdf"></a>
+<iframe href="/dev/svd.pdf" width="100%" height="250px"></iframe>
 
 # PDRP 2021 - QuSP
 
