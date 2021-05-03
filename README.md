@@ -1,3 +1,5 @@
+![An image of the singular value decomposition on a tensor.](/dev/svd.pdf)
+
 # PDRP 2021 - QuSP
 
 **Qu**antum **S**imulation **P**layground
