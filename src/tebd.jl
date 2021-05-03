@@ -1,6 +1,6 @@
 module TimeEvolvingBlockDecimation
 
-export Hamiltonian, block_evolve
+export Hamiltonian, block_evolve, tebd
 
 include("./mps.jl")
 using .MatrixProductState
@@ -16,8 +16,7 @@ end
 
 
 """
-    Applies eᴴᵗ to ψ. 
-    Performs block evolution from left to right.
+    Applies a single block evolution step to ψ.
 """
 function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
     N = length(ψ.sites)
@@ -43,6 +42,8 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
     for i = N-2:-1:2
         right_site = ψ.sites[i]
         left_site = previous_right_site
+        right_edge_dim = size(right_site)[3]
+        left_edge_dim = size(left_site)[1]
         @einsum block[left, q1, q2, right] :=
             left_site[left, q1, chi] * right_site[chi, q2, right]
         @einsum evolved[left, q1, q2, right] :=
@@ -50,18 +51,12 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
             half_field[c, a] *
             half_field[d, b] *
             block[left, a, b, right]
-        _, new_left_site, new_right_site =
-            split_tensor(evolved, 2 * ψ.bond_dim, 2 * ψ.bond_dim, ψ.bond_dim)
-        push!(
-            updated_sites,
-            reshape(
-                new_left_site,
-                length(new_right_site) ÷ (2 * ψ.bond_dim),
-                2,
-                ψ.bond_dim,
-            ),
-        )
-        previous_right_site = reshape(new_right_site, size(right_site)...)
+        new_bond_dim, new_left_site, new_right_site =
+            split_tensor(evolved, left_edge_dim * 2, right_edge_dim * 2, ψ.bond_dim)
+        new_left_edge_dim = size(left_site)[1]
+        new_right_edge_dim = size(right_site)[3]
+        push!(updated_sites, reshape(new_left_site, new_left_edge_dim, 2, new_bond_dim))
+        previous_right_site = reshape(new_right_site, new_bond_dim, 2, new_right_edge_dim)
     end
     rightmost_site = ψ.sites[1]
     left_site = previous_right_site
@@ -74,6 +69,20 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
     push!(updated_sites, reshape(new_right_site, size(rightmost_site)...))
     res = MPS(reverse(updated_sites), ψ.bond_dim, 1)
     return set_orthogonality(res, N)
+end
+
+
+"""
+    Performs time evolving block decimation on ψ. As `num_steps` increases
+    the fidelity against the true time-evolved state increases (per
+    Suzuki-Trotter decomposition).
+"""
+function tebd(ψ::MPS, H::Hamiltonian, angle::Number, resolution::Integer = 1)
+    ψ_res = ψ
+    for _ = 1:resolution
+        ψ_res = block_evolve(ψ_res, H, angle / resolution)
+    end
+    return ψ_res
 end
 
 end # module

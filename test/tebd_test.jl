@@ -188,24 +188,33 @@ end
         @test all(map(do_local_spin_test, angles))
 
         # Fixed random test with interaction term
-        # 3 sites
         ψ = [
-            0.3845365570336037
-            0.7266090779430696
-            0.9145958504643772
-            0.18064922219424306
-            0.5427245165195134
-            0.6423380082696535
-            0.49916676166641705
-            0.4171892940478734
+            0.2007953f0 + 0.75265944f0im
+            0.80030394f0 + 0.41267908f0im
+            0.5720874f0 + 0.7258271f0im
+            0.24059021f0 + 0.2459718f0im
+            0.30385184f0 + 0.5990107f0im
+            0.13170183f0 + 0.80890477f0im
+            0.02885878f0 + 0.19243884f0im
+            0.49203765f0 + 0.5239831f0im
+            0.84893835f0 + 0.8569777f0im
+            0.031204581f0 + 0.23515308f0im
+            0.062227964f0 + 0.6164305f0im
+            0.6660845f0 + 0.24422407f0im
+            0.91392064f0 + 0.63511574f0im
+            0.44659543f0 + 0.34430194f0im
+            0.8511541f0 + 0.49638438f0im
+            0.33232164f0 + 0.54759526f0im
         ]
         ψ /= norm(ψ)
-        ψ_t = reshape(ψ, 2, 2, 2)
-        ψ_mps = mps(ψ_t)
+        ψ_t = reshape(ψ, 2, 2, 2, 2)
+        ψ_mps = mps(ψ_t, 4)
         ising = Hamiltonian(σ_z ⊗ σ_z, σ_x)
-        H = ising_matrix(3)
-        ϕ_res = exp(H * π / 100 * 1im) * ψ
-        ψ_res = reshape(contract_mps(block_evolve(ψ_mps, ising, π / 100 * 1im)), 8)
-        # TODO -- how can we make this equal?
+        H = ising_matrix(4)
+
+        angle = π / 6 * -1im
+        ψ_res = reshape(contract_mps(tebd(ψ_mps, ising, angle, 100)), 2^4)
+        ϕ_res = exp(H * angle) * ψ
+        @test abs(dot(ψ_res, ϕ_res) - 1) < 0.003
     end
 end
