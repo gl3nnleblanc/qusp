@@ -31,11 +31,13 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
 
     leftmost_site = ψ.sites[N]
     second_leftmost_site = ψ.sites[N-1]
+    right_edge_dim = size(second_leftmost_site)[3]
     @einsum block[q1, q2, right] :=
         leftmost_site[q1, chi] * second_leftmost_site[chi, q2, right]
     @einsum evolved[q1, q2, right] :=
         interaction[q1, q2, c, d] * field[c, a] * half_field[d, b] * block[a, b, right]
-    _, new_left_site, new_right_site = split_tensor(evolved, 2, 2 * ψ.bond_dim, ψ.bond_dim)
+    new_right_dim = size(evolved)[3]
+    _, new_left_site, new_right_site = split_tensor(evolved, 2, 2 * right_edge_dim, ψ.bond_dim)
     push!(updated_sites, new_left_site)
     previous_right_site = reshape(new_right_site, size(second_leftmost_site)...)
 
@@ -60,11 +62,11 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
     end
     rightmost_site = ψ.sites[1]
     left_site = previous_right_site
-
+    left_edge_dim = size(left_site)[1]
     @einsum block[left, q1, q2] := left_site[left, q1, chi] * rightmost_site[chi, q2]
     @einsum evolved[left, q1, q2] :=
         interaction[q1, q2, c, d] * half_field[c, a] * field[d, b] * block[left, a, b]
-    _, new_left_site, new_right_site = split_tensor(evolved, 2 * ψ.bond_dim, 2, ψ.bond_dim)
+    _, new_left_site, new_right_site = split_tensor(evolved, 2 * left_edge_dim, 2, ψ.bond_dim)
     push!(updated_sites, reshape(new_left_site, size(left_site)...))
     push!(updated_sites, reshape(new_right_site, size(rightmost_site)...))
     res = MPS(reverse(updated_sites), ψ.bond_dim, 1)
