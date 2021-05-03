@@ -1,4 +1,4 @@
-<img src="/dev/svd.pdf" width="100%" height="250px">
+<img src="/dev/svd.svg" width="100%" height="250px">
 
 # PDRP 2021 - QuSP
 
