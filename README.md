@@ -1,4 +1,4 @@
-![An image of the singular value decomposition on a tensor.](/dev/svd.pdf)
+<a href="/dev/svd.pdf"></a>
 
 # PDRP 2021 - QuSP
 
