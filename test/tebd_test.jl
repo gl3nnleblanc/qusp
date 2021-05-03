@@ -188,24 +188,16 @@ end
         @test all(map(do_local_spin_test, angles))
 
         # Fixed random test with interaction term
-        # 3 sites
-        ψ = [
-            0.3845365570336037
-            0.7266090779430696
-            0.9145958504643772
-            0.18064922219424306
-            0.5427245165195134
-            0.6423380082696535
-            0.49916676166641705
-            0.4171892940478734
-        ]
+        ψ = rand(ComplexF32, 2^4)
         ψ /= norm(ψ)
-        ψ_t = reshape(ψ, 2, 2, 2)
-        ψ_mps = mps(ψ_t)
+        ψ_t = reshape(ψ, 2, 2, 2, 2)
+        ψ_mps = mps(ψ_t, 4)
         ising = Hamiltonian(σ_z ⊗ σ_z, σ_x)
-        H = ising_matrix(3)
-        ϕ_res = exp(H * π / 100 * 1im) * ψ
-        ψ_res = reshape(contract_mps(block_evolve(ψ_mps, ising, π / 100 * 1im)), 8)
-        # TODO -- how can we make this equal?
+        H = ising_matrix(4)
+
+        angle = π / 6 * -1im
+        ψ_res = reshape(contract_mps(tebd(ψ_mps, ising, angle, 100)), 2^4)
+        ϕ_res = exp(H * angle) * ψ
+        @test abs(dot(ψ_res, ϕ_res) - 1) < 0.003
     end
 end
