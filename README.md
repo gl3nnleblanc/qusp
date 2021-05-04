@@ -1,3 +1,5 @@
+<img src="/dev/svd.svg" width="100%" height="150px">
+
 # PDRP 2021 - QuSP
 
 **Qu**antum **S**imulation **P**layground
