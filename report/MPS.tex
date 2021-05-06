@@ -1,0 +1,88 @@
+\documentclass[12pt]{article}
+
+\usepackage{xcolor}
+\usepackage{graphicx}%
+
+\usepackage{dsfont}
+\usepackage{amsmath}
+\usepackage[mathlines]{lineno}% Enable numbering of text and display math
+\DeclareMathOperator{\Tr}{Tr}
+\usepackage{url}
+\usepackage[normalem]{ulem}
+\usepackage{multicol}
+\usepackage{braket}
+\bibliographystyle{elsarticle-num}
+
+\makeatletter
+\def\ps@pprintTitle{%
+	\let\@oddhead\@empty
+	\let\@evenhead\@empty
+	\let\@oddfoot\@empty
+	\let\@evenfoot\@oddfoot
+}
+\makeatother
+\makeatletter
+\makeatother
+
+\begin{document}
+
+
+\title{Matrix Product States}
+%
+%
+% author names and IEEE memberships
+% note positions of commas and nonbreaking spaces ( ~ ) LaTeX will not break
+% a structure at a ~ so this keeps an author's name from being broken across
+% two lines.
+% use \thanks{} to gain access to the first footnote area
+% a separate \thanks must be used for each paragraph as LaTeX2e's \thanks
+% was not built to handle multiple paragraphs
+%
+\author{G.~LeBlanc,
+K.~Siva,
+\thanks{This project was part of the Berkeley Physics Directed Reading Program, which allows undergraduates to explore novel material under the auspices of a graduate student mentor. K. Siva very graciously directed this project.}}
+
+\maketitle
+\begin{multicols}{2}
+
+\section*{Introduction}
+	\subsection*{Many-Body Wavefunction}
+		Consider a spin-$\frac{1}{2}$ particle. The particle's state is given by $\ket{\psi}\in\mathds{C}^2$, and for some computational basis $\{\ket{0}, \ket{1}\}$ we can write
+		$$\ket{\psi}=\alpha\ket{0}+\beta\ket{1}$$ with
+		$$|\alpha|^2+|\beta|^2=1.$$ This is the principle of superpostion-- the particle is superposed between the two basis states $\ket{0}$ and $\ket{1}$. Now if we add a second spin-$\frac{1}{2}$ particle, the many-body system $\ket{\Psi}$ is in some superposition of the four states
+		$$\ket{\Psi}=\alpha\ket{00}+\beta\ket{01}+\gamma\ket{10}+\delta\ket{11}.$$
+		Generally, for $N$ qubits (qudits) the system is fully parameterized by $2^N$ ($d^N$) complex numbers: $\ket{\Psi}\in\mathds{C}^{2^N}$. It is useful to notice the natural bijection between the two spaces
+		$$\mathds{C}^{2^N}\longleftrightarrow \mathds{C}^{2\times\cdots\times 2}$$
+		meaning we can instead conceptualize $\ket{\Psi}$ as a \textit{tensor}:
+		$$\ket{\Psi}\in\mathds{C}^{2\times\cdots\times2}$$
+		where in this paper a tensor $\Psi$ is just a multidimensional array with some number of indices such that plugging in an assignment for each index spits out a complex number. More succinctly,
+		$$\Psi_{i_1,i_2,\cdots,i_N}\in\mathds{C}$$
+
+		A \textit{contraction} between two tensors $\Psi$ and $\Phi$ is a summation over a shared index:
+		$$T_{i,j,l,m}=\sum_k\Psi_{i,j,k}\Phi_{l,k,m}$$
+		is an example of a contraction. Note that dot products, matrix multiplication, and trace are all different vestiges of tensor contraction:
+				\begin{align}
+				a\cdot b &=\sum_ka_kb_k\\
+				(Ax)_{i} &=\sum_kA_{ik}x_k\\
+				\Tr(A)&=\sum_kA_{kk}
+			\end{align}
+
+	\subsection*{Tensor Networks}
+	A \textit{tensor network} is an undirected graph whose nodes represent tensors and whose edges correspond to contractions between those tensors. Use of this graphical language for representing quantum systems is attractive since it unveils relevant entanglement properties~\cite{TnIntro}.
+	%TODO:
+	\textcolor{red}{see figure for scalar, vector, matrix, higher}\\
+	%TODO:
+	\textcolor{red}{Proof of trace cyclicality via TNs.}
+\section*{Matrix Product States}
+	\subsection*{Generating a MPS from a tensor}
+	\subsection*{Time Evolving Block Decimation}
+\section*{Package Overview}
+	\subsection*{Julia}
+		Relevant code was written in Julia, chosen for its elegance and simplicity.
+
+\end{multicols}
+
+\bibliography{./references}
+
+
+\end{document}
