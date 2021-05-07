@@ -9,7 +9,7 @@
 \DeclareMathOperator{\Tr}{Tr}
 \usepackage{url}
 \usepackage[normalem]{ulem}
-\usepackage{multicol}
+\usepackage{multicol, caption}
 \usepackage{braket}
 \bibliographystyle{elsarticle-num}
 
@@ -23,6 +23,10 @@
 \makeatother
 \makeatletter
 \makeatother
+
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
 
 \begin{document}
 
@@ -61,16 +65,27 @@ K.~Siva,
 		A \textit{contraction} between two tensors $\Psi$ and $\Phi$ is a summation over a shared index:
 		$$T_{i,j,l,m}=\sum_k\Psi_{i,j,k}\Phi_{l,k,m}$$
 		is an example of a contraction. Note that dot products, matrix multiplication, and trace are all different vestiges of tensor contraction:
-				\begin{align}
+				\begin{align*}
 				a\cdot b &=\sum_ka_kb_k\\
 				(Ax)_{i} &=\sum_kA_{ik}x_k\\
 				\Tr(A)&=\sum_kA_{kk}
-			\end{align}
+			\end{align*}
 
 	\subsection*{Tensor Networks}
-	A \textit{tensor network} is an undirected graph whose nodes represent tensors and whose edges correspond to contractions between those tensors. Use of this graphical language for representing quantum systems is attractive since it unveils relevant entanglement properties~\cite{TnIntro}.
+	A \textit{tensor network} is an undirected graph whose nodes represent tensors and whose edges correspond to tensor indices. An edge between two tensors corresponds to a contraction along the depicted axis of each tensor. Use of this graphical language for representing quantum systems is attractive since it unveils relevant entanglement properties~\cite{TnIntro}.
 	%TODO:
-	\textcolor{red}{see figure for scalar, vector, matrix, higher}\\
+	\begin{Figure}
+		\center\includegraphics[width=.9\textwidth]{./Figures/tensors.eps}
+		\captionof{figure}{A graphical depiction of a scalar $c$, vector $v_i$, matrix $M_{ij}$, and a tensor $T_{ijk}$ of rank three.}
+		\label{tensor-graphics}
+	\end{Figure}
+	See figure~\ref{tensor-graphics} for a graphical depiction of tensors of rank zero to three. Each tensor is denoted as a node with free edges representing each index.
+	Figure~\ref{tensor-contractions} depicts the previous examples (dot product, matrix multiplication, trace) of tensor contraction using this graphical language.
+	\begin{Figure}
+		\center\includegraphics[width=.5\textwidth]{./Figures/contractions.eps}
+		\captionof{figure}{A graphical depiction of three examples of tensor contraction.}
+		\label{tensor-contractions}
+	\end{Figure}
 	%TODO:
 	\textcolor{red}{Proof of trace cyclicality via TNs.}
 \section*{Matrix Product States}
@@ -80,8 +95,8 @@ K.~Siva,
 	\subsection*{Julia}
 		Relevant code was written in Julia, chosen for its elegance and simplicity.
 
-\end{multicols}
 
+\end{multicols}
 \bibliography{./references}
 
 
