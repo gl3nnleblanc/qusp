@@ -50,50 +50,94 @@ K.~Siva,
 \begin{multicols}{2}
 
 \section*{Introduction}
-	\subsection*{Many-Body Wavefunction}
-		Consider a spin-$\frac{1}{2}$ particle. The particle's state is given by $\ket{\psi}\in\mathds{C}^2$, and for some computational basis $\{\ket{0}, \ket{1}\}$ we can write
-		$$\ket{\psi}=\alpha\ket{0}+\beta\ket{1}$$ with
-		$$|\alpha|^2+|\beta|^2=1.$$ This is the principle of superpostion-- the particle is superposed between the two basis states $\ket{0}$ and $\ket{1}$. Now if we add a second spin-$\frac{1}{2}$ particle, the many-body system $\ket{\Psi}$ is in some superposition of the four states
+	\subsection*{Many-Body Wavefunctions as Tensors}
+		Consider a spin-$\frac{1}{2}$ particle. The particle's state is given by
+		$\ket{\psi}\in\mathds{C}^2$, and for some computational basis
+		$\{\ket{0}, \ket{1}\}$ we can write
+		$$\ket{\psi}=\alpha\ket{0}+\beta\ket{1}$$
+		with
+		$$|\alpha|^2+|\beta|^2=1.$$
+		This is the principle of superpostion-- the particle is superposed
+		between the two basis states $\ket{0}$ and $\ket{1}$. Now if we add
+		a second spin-$\frac{1}{2}$ particle, the many-body system
+		$\ket{\Psi}$ is in some superposition of the four states
 		$$\ket{\Psi}=\alpha\ket{00}+\beta\ket{01}+\gamma\ket{10}+\delta\ket{11}.$$
-		Generally, for $N$ qubits (qudits) the system is fully parameterized by $2^N$ ($d^N$) complex numbers: $\ket{\Psi}\in\mathds{C}^{2^N}$. It is useful to notice the natural bijection between the two spaces
+		Generally, for $N$ qubits (qudits) the system is fully
+		parameterized by $2^N$ ($d^N$) complex numbers:
+		$\ket{\Psi}\in\mathds{C}^{2^N}$. Notice the exponential scaling
+		here. It is useful also to notice the natural bijection between
+		the two spaces
 		$$\mathds{C}^{2^N}\longleftrightarrow \mathds{C}^{2\times\cdots\times 2}$$
-		meaning we can instead conceptualize $\ket{\Psi}$ as a \textit{tensor}:
+		meaning we can instead conceptualize $\ket{\Psi}$ as a
+		\textit{tensor}:
 		$$\ket{\Psi}\in\mathds{C}^{2\times\cdots\times2}$$
-		where in this paper a tensor $\Psi$ is just a multidimensional array with some number of indices such that plugging in an assignment for each index spits out a complex number. More succinctly,
+		where in this paper a tensor $\Psi$ is just a multidimensional
+		array with some number of indices such that plugging in an
+		assignment for each index spits out a complex number. More
+		succinctly,
 		$$\Psi_{i_1,i_2,\cdots,i_N}\in\mathds{C}$$
-
-		A \textit{contraction} between two tensors $\Psi$ and $\Phi$ is a summation over a shared index:
+		A \textit{contraction} between two tensors $\Psi$ and $\Phi$ is
+		a summation over a shared index:
 		$$T_{i,j,l,m}=\sum_k\Psi_{i,j,k}\Phi_{l,k,m}$$
-		is an example of a contraction. Note that dot products, matrix multiplication, and trace are all different vestiges of tensor contraction:
+		is an example of a contraction. Note that dot products, matrix
+		multiplication, and trace are all different vestiges of tensor
+		contraction:
 				\begin{align*}
 				a\cdot b &=\sum_ka_kb_k\\
 				(Ax)_{i} &=\sum_kA_{ik}x_k\\
 				\Tr(A)&=\sum_kA_{kk}
 			\end{align*}
 
+
 	\subsection*{Tensor Networks}
-	A \textit{tensor network} is an undirected graph whose nodes represent tensors and whose edges correspond to tensor indices. An edge between two tensors corresponds to a contraction along the depicted axis of each tensor. Use of this graphical language for representing quantum systems is attractive since it unveils relevant entanglement properties~\cite{TnIntro}.
-	%TODO:
+	A \textit{tensor network} is an undirected graph whose nodes
+	represent tensors and whose edges correspond to tensor indices. An
+	edge between two tensors corresponds to a contraction along the
+	depicted axis of each tensor. Use of this graphical language for
+	representing quantum systems is attractive since it unveils relevant
+	entanglement properties~\cite{TnIntro}.
 	\begin{Figure}
 		\center\includegraphics[width=.9\textwidth]{./Figures/tensors.eps}
-		\captionof{figure}{A graphical depiction of a scalar $c$, vector $v_i$, matrix $M_{ij}$, and a tensor $T_{ijk}$ of rank three.}
+		\captionof{figure}{A graphical depiction of a scalar $c$, vector
+		    $v_i$, matrix $M_{ij}$, and a tensor $T_{ijk}$ of rank three.}
 		\label{tensor-graphics}
 	\end{Figure}
-	See figure~\ref{tensor-graphics} for a graphical depiction of tensors of rank zero to three. Each tensor is denoted as a node with free edges representing each index.
-	Figure~\ref{tensor-contractions} depicts the previous examples (dot product, matrix multiplication, trace) of tensor contraction using this graphical language.
+	See figure~\ref{tensor-graphics} for a graphical depiction of
+	tensors of rank zero to three. Each tensor is denoted as a node with
+	free edges representing each index.
+
+	Figure~\ref{tensor-contractions} depicts the previous examples (dot
+	product, matrix multiplication, trace) of tensor contraction using
+	this graphical language.
 	\begin{Figure}
 		\center\includegraphics[width=.5\textwidth]{./Figures/contractions.eps}
-		\captionof{figure}{A graphical depiction of three examples of tensor contraction.}
+		\captionof{figure}{A graphical depiction of three examples of
+		    tensor contraction.}
 		\label{tensor-contractions}
 	\end{Figure}
-	%TODO:
-	\textcolor{red}{Proof of trace cyclicality via TNs.}
+	An example of an insight this graphical language provides is in
+	proving trace cyclicality. The standard proof is as follows:
+	\begin{align*}
+		\Tr(ABC)&=\sum_{ijk}A_{ij}B_{jk}C_{ki}\\
+						&=\sum_{ijk}C_{ki}A_{ij}B_{jk}\\
+						&=\Tr(CAB)
+	\end{align*}
+	The tensor network proof is depicted in figure~\ref{trace}:
+	\begin{Figure}
+		\center\includegraphics[width=.8\textwidth]{./Figures/trace.eps}
+		\captionof{figure}{Proof of trace cyclicality.}
+		\label{trace}
+	\end{Figure}
+	The graphical depiction of trace provides simpler insight into the
+	cyclic structure of the underlying tensor contractions required to
+	calculate $\Tr(ABC)$, and thus allows for a totally visual and
+	immediately obvious proof of the cyclicality.
 \section*{Matrix Product States}
 	\subsection*{Generating a MPS from a tensor}
 	\subsection*{Time Evolving Block Decimation}
 \section*{Package Overview}
 	\subsection*{Julia}
-		Relevant code was written in Julia, chosen for its elegance and simplicity.
+		Julia is da best
 
 
 \end{multicols}
