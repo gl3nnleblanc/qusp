@@ -1,7 +1,8 @@
 \documentclass[12pt]{article}
 
 \usepackage{xcolor}
-\usepackage{graphicx}%
+\usepackage{graphicx}
+\usepackage[left=1.5cm,top=2.5cm,right=1.5cm,bottom=2.5cm,bindingoffset=0.5cm]{geometry}
 
 \usepackage{dsfont}
 \usepackage{amsmath}
@@ -42,9 +43,12 @@
 % a separate \thanks must be used for each paragraph as LaTeX2e's \thanks
 % was not built to handle multiple paragraphs
 %
-\author{G.~LeBlanc,
-K.~Siva,
-\thanks{This project was part of the Berkeley Physics Directed Reading Program, which allows undergraduates to explore novel material under the auspices of a graduate student mentor. K. Siva very graciously directed this project.}}
+\author{Glenn~LeBlanc,
+Karthik~Siva
+\thanks{This project was part of the Berkeley Physics Directed
+Reading Program, which allows undergraduates to explore novel
+material under the auspices of a graduate student mentor. K. Siva
+very graciously directed this project.}}
 
 \maketitle
 \begin{multicols}{2}
@@ -124,16 +128,39 @@ K.~Siva,
 	\end{align*}
 	The tensor network proof is depicted in figure~\ref{trace}:
 	\begin{Figure}
-		\center\includegraphics[width=.8\textwidth]{./Figures/trace.eps}
+		\center\includegraphics[width=.7\textwidth]{./Figures/trace.eps}
 		\captionof{figure}{Proof of trace cyclicality.}
 		\label{trace}
 	\end{Figure}
 	The graphical depiction of trace provides simpler insight into the
 	cyclic structure of the underlying tensor contractions required to
 	calculate $\Tr(ABC)$, and thus allows for a totally visual and
-	immediately obvious proof of the invariance under cyclic
-	permutations of $A$, $B$, and $C$.
+	immediately obvious proof of the invariance of trace under
+	cyclic permutations of $A$, $B$, and $C$.
+
+
+
 \section*{Matrix Product States}
+	A \textit{matrix product state} (MPS) is a particular class
+	of
+	tensor network consisting of a chain of tensors each having one
+	dangling edge and a bond between their nearest neighbors. See figure
+	\ref{mps-example} for an example of a MPS with three sites with
+	periodic and nonperiodic boundary conditions. From here we only
+	consider MPS with nonperiodic boundary conditions.
+	\begin{Figure}
+		\center\includegraphics[width=.7\textwidth]{./Figures/mps-example.eps}
+		\captionof{figure}{Two three-site MPS, the first lacking periodic boundary conditions and the second with periodic boundary conditions.}
+		\label{mps-example}
+	\end{Figure}
+	The indices $\chi_i$ in figure~\ref{mps-example} are called
+	\textit{bond indices} and are associated with a
+	\textit{bond dimension}. The free indices $i,j,k$ are
+	\textit{site indices}. Algebraically, the MPS decomposition of a tensor $\Psi$ is written as:
+	$$\Psi_{i_1,i_2,\cdots,i_N}=\sum_{\chi_1,\chi_2,\cdots,\chi_{N-1}}A^{[1]\chi_1}_{i_1}A_{i_2}^{[2]\chi_1,\chi_2}\cdots A^{[N]\chi_{N-1}}_{i_N}$$
+	For a given choice of site indices (e.g., $i_1=0$, $i_2=1$, $i_3=0$,
+	$\cdots$), the coefficient $\Psi_{010\cdots}$ is given by a matrix
+	product-- hence the name matrix product state.
 	\subsection*{Generating a MPS from a tensor}
 	\subsection*{Time Evolving Block Decimation}
 \section*{Package Overview}
