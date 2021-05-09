@@ -84,7 +84,12 @@ function eval_local_op(m::MPS, M::Array{<:Number}, site::Integer)
     m = set_orthogonality(m, site)
     ψ = m.sites[site]
     conj_ψ = conj.(ψ)
-    @einsum res := ψ[χ_l, α, χ_r] * M[α, β] * conj_ψ[χ_l, β, χ_r]
+    local res
+    if site < length(m.sites)
+        @einsum res := ψ[χ_l, α, χ_r] * M[α, β] * conj_ψ[χ_l, β, χ_r]
+    else
+        @einsum res := ψ[α, χ] * M[α, β] * conj_ψ[β, χ]
+    end
     return res
 end
 

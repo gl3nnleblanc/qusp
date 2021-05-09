@@ -250,9 +250,30 @@ using .MatrixProductState
         σ_z = [1 0; 0 -1]
         I = [1 0; 0 1]
         conj_tensor = conj.(A_mps_tensor)
+        
+        @einsum full_res :=
+            A_mps_tensor[a, b, c, d, α] * σ_z[α, β] * conj_tensor[a, b, c, d, β]
+        easy_res = eval_local_op(A_mps, σ_z, 1)
+        @test round(easy_res, digits = 12) == round(full_res, digits = 12)
+
+        @einsum full_res :=
+            A_mps_tensor[a, b, c, α, d] * σ_z[α, β] * conj_tensor[a, b, c, β, d]
+        easy_res = eval_local_op(A_mps, σ_z, 2)
+        @test round(easy_res, digits = 12) == round(full_res, digits = 12)
+
         @einsum full_res :=
             A_mps_tensor[a, b, α, c, d] * σ_z[α, β] * conj_tensor[a, b, β, c, d]
         easy_res = eval_local_op(A_mps, σ_z, 3)
+        @test round(easy_res, digits = 12) == round(full_res, digits = 12)
+
+        @einsum full_res :=
+            A_mps_tensor[a, α, b, c, d] * σ_z[α, β] * conj_tensor[a, α, b, c, d]
+        easy_res = eval_local_op(A_mps, σ_z, 4)
+        @test round(easy_res, digits = 12) == round(full_res, digits = 12)
+
+        @einsum full_res :=
+            A_mps_tensor[α, a, b, c, d] * σ_z[α, β] * conj_tensor[α, a, b, c, d]
+        easy_res = eval_local_op(A_mps, σ_z, 5)
         @test round(easy_res, digits = 12) == round(full_res, digits = 12)
     end
 end
