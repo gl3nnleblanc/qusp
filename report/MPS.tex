@@ -102,8 +102,8 @@ very graciously directed this project.}}
 	entanglement properties~\cite{TnIntro}.
 	\begin{Figure}
 		\center\includegraphics[width=.9\textwidth]{./Figures/tensors.eps}
-		\captionof{figure}{A graphical depiction of a scalar $c$, vector
-		    $v_i$, matrix $M_{ij}$, and a tensor $T_{ijk}$ of rank three.}
+		\captionof{figure}{\textit{A graphical depiction of a scalar $c$, vector
+		    $v_i$, matrix $M_{ij}$, and a tensor $T_{ijk}$ of rank three.}}
 		\label{tensor-graphics}
 	\end{Figure}
 	See figure~\ref{tensor-graphics} for a graphical depiction of
@@ -114,9 +114,9 @@ very graciously directed this project.}}
 	product, matrix multiplication, trace) of tensor contraction using
 	this graphical language.
 	\begin{Figure}
-		\center\includegraphics[width=.5\textwidth]{./Figures/contractions.eps}
-		\captionof{figure}{A graphical depiction of three examples of
-		    tensor contraction.}
+		\center\includegraphics[width=.35\textwidth]{./Figures/contractions.eps}
+		\captionof{figure}{\textit{A graphical depiction of three examples of
+		    tensor contraction.}}
 		\label{tensor-contractions}
 	\end{Figure}
 	An example of an insight this graphical language provides is in
@@ -129,7 +129,7 @@ very graciously directed this project.}}
 	The tensor network proof is depicted in figure~\ref{trace}:
 	\begin{Figure}
 		\center\includegraphics[width=.7\textwidth]{./Figures/trace.eps}
-		\captionof{figure}{Proof of trace cyclicality.}
+		\captionof{figure}{\textit{Proof of trace cyclicality.}}
 		\label{trace}
 	\end{Figure}
 	The graphical depiction of trace provides simpler insight into the
@@ -149,8 +149,9 @@ very graciously directed this project.}}
 	periodic and nonperiodic boundary conditions. From here we only
 	consider MPS with nonperiodic boundary conditions.
 	\begin{Figure}
-		\center\includegraphics[width=.7\textwidth]{./Figures/mps-example.eps}
-		\captionof{figure}{Two three-site MPS, the first lacking periodic boundary conditions and the second with periodic boundary conditions.}
+		\center\includegraphics[width=.55\textwidth]{./Figures/mps-example.eps}
+		\captionof{figure}{\textit{Two three-site MPS, the first lacking
+		periodic boundary conditions and the second with periodic boundary conditions.}}
 		\label{mps-example}
 	\end{Figure}
 	The indices $\chi_i$ in figure~\ref{mps-example} are called
@@ -158,14 +159,63 @@ very graciously directed this project.}}
 	\textit{bond dimension}. The free indices $i,j,k$ are
 	\textit{site indices}. Algebraically, the MPS decomposition of a tensor $\Psi$ is written as:
 	$$\Psi_{i_1,i_2,\cdots,i_N}=\sum_{\chi_1,\chi_2,\cdots,\chi_{N-1}}A^{[1]\chi_1}_{i_1}A_{i_2}^{[2]\chi_1,\chi_2}\cdots A^{[N]\chi_{N-1}}_{i_N}$$
+	where the first and last local tensors $A^{[1]}$ and $A^{[N]}$
+	matrices and every other tensor in the chain is of rank three.
 	For a given choice of site indices (e.g., $i_1=0$, $i_2=1$, $i_3=0$,
 	$\cdots$), the coefficient $\Psi_{010\cdots}$ is given by a matrix
 	product-- hence the name matrix product state.
 	\subsection*{Generating a MPS from a tensor}
+	The first step of the iterative process for generating a MPS from a
+	tensor is depicted in figure~\ref{svd} for an initial tensor with
+	three indices, each of dimension $d$. The input tensor $\psi$ is
+	reshaped into a matrix $\psi_{MAT}$ by squashing indices the two
+	leftmost indices into one index while keeping the rightmost index
+	separated. The singular value decomposition is then performed on
+	$\psi_{MAT}$. $\Sigma$ is truncated and renormalized to $\Sigma'$
+	such that the bond index between $V$ and $\Sigma$ is less than or
+	equal to the bond dimension $\chi$. The truncated matrix $\Sigma'$
+	is contracted to the left into $U$, resulting in the $d^2\times\chi$
+	matrix $\psi'_{MAT}$. Finally, the index of dimension $d^2$ is
+	unsquashed into two indices of dimension $d$ each. The leftmost site
+	in figure~\ref{svd} is an orthonormal matrix by definition of the
+	SVD. Non-boundary sites in the final chain resulting from
+	iteratively applying this	method are \textit{right normal}, which is
+	a loose generalization of orthonormality. Algebraically, if a tensor
+	$T_{L,i,R}\in\mathds{C}^{b\times d\times b}$
+	is right normal, then
+	$$\sum_{i,R}T_{L,i,R}T^*_{L',i,R}=\delta_{L,L'}$$
+	and likewise if $T$ is left normal then
+	$$\sum_{i,L}T_{L,i,R}T^*_{L,i,R'}=\delta_{R,R'}.$$
+	See figure~\ref{lr-normal} for a graphical depiction of this property.
+	%%%%%%%% BREAK IN MULTICOL
+	\end{multicols}
+	\begin{Figure}
+		\center\includegraphics[width=.9\textwidth]{./Figures/svd.eps}
+		\captionof{figure}{\textit{Separating the first site index from $\psi$.}}
+		\label{svd}
+	\end{Figure}
+	\begin{multicols}{2}
+
+	\begin{Figure}
+		\center\includegraphics[width=.55\textwidth]{./Figures/lr_normal.eps}
+		\captionof{figure}{\textit{Left normality (green) and right normality (red).}}
+		\label{lr-normal}
+	\end{Figure}
+	\subsection*{Moving the Orthogonality Center}
+	If we have a MPS in
+
 	\subsection*{Time Evolving Block Decimation}
 \section*{Package Overview}
+	This section provides an overview of the meat of this project: a
+	Julia package for creating and manipulating matrix
+	product states, located at~\\
+	\url{https://github.com/gl3nnleblanc/pdrp2021}.
 	\subsection*{Julia}
-		Julia is da best
+	Julia is a modern programming language incubated at MIT in 2009 and
+	designed from the beginning with high performance in mind~\cite{Julia-lang}.
+	Julia is fast, easy to use, and open source.
+	\subsection*{Algorithms}
+	\subsection*{Examples}
 
 
 \end{multicols}
