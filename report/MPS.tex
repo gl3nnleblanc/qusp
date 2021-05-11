@@ -5,6 +5,8 @@
 \usepackage[left=1.5cm,top=2.5cm,right=1.5cm,bottom=2.5cm,bindingoffset=0.5cm]{geometry}
 
 \usepackage{dsfont}
+\usepackage{algorithm2e}
+\usepackage{stmaryrd}
 \usepackage{amsmath}
 \usepackage[mathlines]{lineno}% Enable numbering of text and display math
 \DeclareMathOperator{\Tr}{Tr}
@@ -299,18 +301,19 @@ very graciously directed this project.}}
 			\left(\prod_{i=1}^Ne^{-i\sigma_x^{(i)}\Delta t}\right)
 		\right]^p
 	\]
-	where the step size $\Delta t=\frac{t}{p}$. A depiction of TEBD
-	with this Hamiltonian is shown in figure~\ref{TEBD}.
+	where the step size $\Delta t=\frac{t}{p}$. A depiction of one TEBD
+	sweep with this Hamiltonian is shown in figure~\ref{TEBD}.
 
 	\begin{Figure}
 		\center\includegraphics[height=350pt]{./Figures/tebd.eps}
 		\captionof{figure}{\textit{One step of time evolving block
 		decimation. The orthogonality center is moved to the leftmost site.
-		Trotterized operators $R_x(\Delta t)$ and $R_{zz}(\Delta t)$ are
+		Trotterized operators $R_x(\Delta t)$ in blue and $R_{zz}(\Delta t)$
+		in yellow are
 		applied to the orthogonality center and its rightmost neighbor. A
 		SVD is performed and the singular value matrix is truncated and
 		contracted to the right to enforce the bond dimension $\chi$. The
-		sweep continues until reaching the second to last site, at which
+		sweep continues until reaching the last site, at which
 		point the orthogonality center is again moved to the leftmost site
 		and the above process is repeated $p-1$ additional times.}}
 		\label{TEBD}
@@ -322,7 +325,9 @@ very graciously directed this project.}}
 	entanglement the MPS can ever reach. If, however, $\hat{H}$ consists
 	entirely of single-site terms, then this method is exact since the
 	systems entanglement cannot grow through time evolution under
-	$\hat{H}$.
+	$\hat{H}$. See the rightmost heatmap in figure~\ref{tebd-heatmaps}
+	for an example of what time evolution under a nonentangling
+	Hamiltonian might look like.
 
 
 \section*{Package Overview}
@@ -335,7 +340,51 @@ very graciously directed this project.}}
 	designed from the beginning with high performance in mind~\cite{Julia-lang}.
 	Julia is fast, easy to use, and open source.
 	\subsection*{Algorithms}
-	%TODO: mps generation pseudocode
+	The following section contains pseucode outlining the main ideas
+	of what was implemented in the package. Again, the full code written
+	in Julia is available at the repository.
+	\begin{algorithm}[H]
+		\KwData{input tensor $T$, left\_dim, right\_dim, $\chi$}
+		\KwResult{length($\Sigma$), $T_{next}$, $V$}
+		$T_{MAT}$ $\mapsfrom$ reshape(T, left\_dim, right\_dim)\;
+		$T_{next}$, $\Sigma$, $V^\dagger$ $\mapsfrom$ SVD($T_{MAT}$)\;
+		$V$ $\mapsfrom$ $(V^\dagger)^\dagger$\;
+		$\Sigma$ $\mapsfrom$ truncate\_to\_chi($\Sigma$, $\chi$)\;
+		$T_{next}$ $\mapsfrom$ truncate\_to\_chi($T_{next}$, $\chi$)\;
+		\Return length($\Sigma$), $T_{next}$, $V$\;
+		\caption{Helper function for splitting a tensor.}
+		\label{split-tensor}
+	\end{algorithm}
+	\vspace{20px}
+	\begin{algorithm}[H]
+		\KwData{input tensor $\Psi$, desired bond dimension $\chi$}
+		N $\mapsfrom$ tensor rank of $\Psi$\;
+		sites $\mapsfrom$ [ ]\;
+		$d_{next}$, $T_{next}$, $T_{curr}$ $\mapsfrom$ split\_tensor($\Psi$, $2^{N-1}$, 2, $\chi$)\;
+		sites.append($T_{curr}$)\;
+		\For{i $\mapsfrom$ 2 to $N-1$}{
+			$d_{next}$, $T_{next}$, $T_{curr}$ $\mapsfrom$ split\_tensor($T_{next}$, $2^{N-i}$, $2^i$, $\chi$)\;
+			\eIf{length($T_{curr}$) = $\chi^2$ * 2}{
+				$T_{curr}$ $\mapsfrom$ reshape($T_{curr}$, $\chi$, 2, $\chi$)\;
+			}{
+				$d_{prev}$ $\mapsfrom$ length($T_curr$) $\div$ $(2 \times d_{next})$\;
+				$T_{curr}$ $\mapsfrom$ reshape($T_{curr}$, $d_{next}$, 2, $d_{prev}$)\;
+			}
+			sites.append($T_{curr}$)\;
+		}
+		\_, $T_{next}$, $T_{curr}$ $\mapsfrom$ split\_tensor($T_{next}$, 2, $d_{prev}$, $\chi$)\;
+		$T_{curr}$ $\mapsfrom$ reshape($T_curr$, 2, 2, :)\;
+		sites.append($T_{curr}$)\;
+		sites.append($T_{next}$)\;
+		\Return MPS(sites, $\chi$, N)\;
+		\caption{Generating a MPS from input tensor $\Psi$.}
+		\label{mps-gen}
+	\end{algorithm}
+
+		Algorithm~\ref{mps-gen} returns a MPS wrapper consisting of an array of
+		tensors arranged from left to right in descending order. Said another way,
+		the $N$th entry of this array is the leftmost site.
+
 	%TODO: orthogonality center moving pseudocode
 	%TODO: single tebd sweep pseudocode
 	%TODO: tebd evolution pseudocode
@@ -360,13 +409,14 @@ very graciously directed this project.}}
 		\center\includegraphics[height=200px]{./Figures/ising_j1_interactions_heatmap.png}\hspace{50px}\includegraphics[height=200px]{./Figures/ising_j1_local_heatmap.png}
 		\captionof{figure}{\textit{Heatmaps of $\langle\sigma_z\rangle$ for each
 		site in a chain of 12 qubits time evolving under a ($J=1$) 1D Ising model with (left) and without (right) the local interaction term
-		$\sigma_z^{(i)}\sigma_z^{(i+1)}$.}}
+		$\sigma_z^{(i)}\sigma_z^{(i+1)}$. Using an MPS with $\chi=32$ and
+		running 1000 sweeps on an Intel i5-6600k @ 3.9 GHz took $\approx3$ minutes.}}
 		\label{tebd-heatmaps}
 	\end{Figure}
 
 	\begin{Figure}
 		\center\includegraphics[width=0.9\textwidth]{./Figures/ising_with_interactions.pdf}
-		\captionof{figure}{\textit{Graph corresponding to the left heatmap in figure~\ref{tebd-heatmaps}}}
+		\captionof{figure}{\textit{Graph corresponding to the left heatmap in figure~\ref{tebd-heatmaps}.}}
 		\label{tebd-graphs}
 	\end{Figure}
 
@@ -380,9 +430,9 @@ very graciously directed this project.}}
 	features~\cite{mps-ml},~\cite{Huggins}.
 
 
-\end{multicols}
-\newpage
 \bibliography{./references}
+
+\end{multicols}
 
 
 \end{document}
