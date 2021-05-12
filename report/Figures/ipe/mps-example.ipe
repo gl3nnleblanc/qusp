@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70218" creator="Ipe 7.2.24">
-<info created="D:20210508143328" modified="D:20210508144220"/>
+<info created="D:20210508143328" modified="D:20210511210447"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -346,8 +346,6 @@ h
 320 704
 320 704 c
 </path>
-<text matrix="1 0 0 1 -4 0" transformations="translations" pos="168 776" stroke="black" type="label" width="16.911" height="7.41" depth="3.35" valign="baseline" size="LARGE" style="math">\chi_1</text>
-<text matrix="1 0 0 1 -4 0" transformations="translations" pos="264 776" stroke="black" type="label" width="16.911" height="7.41" depth="3.35" valign="baseline" size="LARGE" style="math">\chi_2</text>
 <text transformations="translations" pos="136 712" stroke="black" type="label" width="5.751" height="11.286" depth="0" valign="baseline" size="LARGE" style="math">i</text>
 <text transformations="translations" pos="232 712" stroke="black" type="label" width="7.942" height="11.284" depth="3.35" valign="baseline" size="LARGE" style="math">j</text>
 <text transformations="translations" pos="328 712" stroke="black" type="label" width="9.345" height="11.955" depth="0" valign="baseline" size="LARGE" style="math">k</text>
@@ -385,8 +383,6 @@ h
 320 704
 320 704 c
 </path>
-<text matrix="1 0 0 1 0 4" transformations="translations" pos="164 628" stroke="black" type="label" width="16.911" height="7.41" depth="3.35" valign="baseline" size="LARGE" style="math">\chi_1</text>
-<text matrix="1 0 0 1 0 4" transformations="translations" pos="260 628" stroke="black" type="label" width="16.911" height="7.41" depth="3.35" valign="baseline" size="LARGE" style="math">\chi_2</text>
 <path stroke="black" pen="fat">
 96 624 m
 80 624
@@ -398,7 +394,6 @@ h
 352 624
 352 624 c
 </path>
-<text matrix="1 0 0 1 0 4" transformations="translations" pos="160 676" stroke="black" type="label" width="16.911" height="7.41" depth="3.35" valign="baseline" size="LARGE" style="math">\chi_3</text>
 <text transformations="translations" pos="136 568" stroke="black" type="label" width="5.751" height="11.286" depth="0" valign="baseline" size="LARGE" style="math">i</text>
 <text transformations="translations" pos="232 568" stroke="black" type="label" width="7.942" height="11.284" depth="3.35" valign="baseline" size="LARGE" style="math">j</text>
 <text transformations="translations" pos="328 568" stroke="black" type="label" width="9.345" height="11.955" depth="0" valign="baseline" size="LARGE" style="math">k</text>
@@ -408,5 +403,10 @@ h
 <text transformations="translations" pos="316 764" stroke="black" type="label" width="13.296" height="11.764" depth="0" valign="baseline" size="LARGE" style="math">C</text>
 <text transformations="translations" pos="220 620" stroke="black" type="label" width="13.675" height="11.764" depth="0" valign="baseline" size="LARGE" style="math">B</text>
 <text transformations="translations" pos="316 620" stroke="black" type="label" width="13.296" height="11.764" depth="0" valign="baseline" size="LARGE" style="math">C</text>
+<text transformations="translations" pos="160 784" stroke="black" type="label" width="15.595" height="10.672" depth="0" valign="baseline" size="Huge" style="math">\alpha</text>
+<text transformations="translations" pos="256 784" stroke="black" type="label" width="15.076" height="17.213" depth="4.82" valign="baseline" size="Huge" style="math">\beta</text>
+<text transformations="translations" pos="160 640" stroke="black" type="label" width="15.595" height="10.672" depth="0" valign="baseline" size="Huge" style="math">\alpha</text>
+<text transformations="translations" pos="256 640" stroke="black" type="label" width="15.076" height="17.213" depth="4.82" valign="baseline" size="Huge" style="math">\beta</text>
+<text transformations="translations" pos="352 672" stroke="black" type="label" width="13.937" height="10.672" depth="4.82" valign="baseline" size="Huge" style="math">\gamma</text>
 </page>
 </ipe>

@@ -76,7 +76,7 @@ very graciously directed this project.}}
 		coefficients of 40 sites requires over 8 TB.
 		If we want to time evolve $\ket{\Psi}$ under some Hamiltonian $\hat{H}$
 		$$\ket{\Psi(t)}=e^{-it\hat{H}/\hbar}\ket{\Psi}$$
-		we need to exponentiate the matrix $-it\hat{H}/\hbar\in\mathds{C}^{2^N\times2^N}$ and multiply the vector $\ket{\Psi}$ by this result, which takes $O\left(\left(2^N\right)^3\right)$ time. Thus it is extremely worthwhile to find more efficient ways of storing and manipulating the
+		we need to exponentiate the matrix $-it\hat{H}/\hbar\in\mathds{C}^{2^N\times2^N}$ and multiply the vector $\ket{\Psi}$ by this result, which takes $\mathcal{O}\left(\left(2^N\right)^3\right)$ time. Thus it is extremely worthwhile to find more efficient ways of storing and manipulating the
 		quantum state $\ket{\Psi}$ without completely sacrificing fidelity.
 		As a first step, it is useful also to notice the isomorphism between
 		the two spaces
@@ -88,10 +88,10 @@ very graciously directed this project.}}
 		array with some number of indices such that plugging in an
 		assignment for each index spits out a complex number. More
 		succinctly,
-		$$\Psi_{i_1,i_2,\cdots,i_N}\in\mathds{C}$$
+		$$\Psi_{i_1i_2\cdots i_N}\in\mathds{C}$$
 		A \textit{contraction} between two tensors $\Psi$ and $\Phi$ is
 		a summation over a shared index:
-		$$T_{i,j,l,m}=\sum_k\Psi_{i,j,k}\Phi_{l,k,m}$$
+		$$T_{ijlm}=\sum_k\Psi_{ijk}\Phi_{lkm}$$
 		is an example of a contraction. Note that dot products, matrix
 		multiplication, and trace are all different vestiges of tensor
 		contraction:
@@ -163,11 +163,11 @@ very graciously directed this project.}}
 		periodic boundary conditions and the second with periodic boundary conditions.}}
 		\label{mps-example}
 	\end{Figure}
-	The indices $\chi_i$ in figure~\ref{mps-example} are called
+	The indices $\alpha,\beta,\gamma$ in figure~\ref{mps-example} are called
 	\textit{bond indices} and are associated with a
-	\textit{bond dimension}. The free indices $i,j,k$ are
+	\textit{bond dimension} $\chi$. The free indices $i,j,k$ are
 	\textit{site indices}. Algebraically, the MPS decomposition of a tensor $\Psi$ is written as:
-	$$\Psi_{i_1,i_2,\cdots,i_N}=\sum_{\chi_1,\chi_2,\cdots,\chi_{N-1}}A^{[1]\chi_1}_{i_1}A_{i_2}^{[2]\chi_1,\chi_2}\cdots A^{[N]\chi_{N-1}}_{i_N}$$
+	$$\Psi_{i_1i_2\cdots i_N}=\sum_{\chi_1\chi_2\cdots\chi_{N-1}}A^{[1]\chi_1}_{i_1}A_{i_2}^{[2]\chi_1\chi_2}\cdots A^{[N]\chi_{N-1}}_{i_N}$$
 	where the first and last local tensors $A^{[1]}$ and $A^{[N]}$ are
 	matrices and every other tensor in the chain is of rank three. If
 	each bond index is constrained to be of the same dimension $\chi$ then
@@ -191,6 +191,22 @@ very graciously directed this project.}}
 	dimension $\chi$ is exact and requires less memory than storing the
 	individual $2^N$ coefficients of $\ket{\Psi}$.
 
+	\subsection{Left normality, right normality}
+	Left and right normality is loosely a a generalization of
+	orthonormality. Algebraically, if a tensor
+	$T_{lir}\in\mathds{C}^{b\times d\times b}$
+	is right normal, then
+	$$\sum_{ir}T_{lir}T^*_{l'ir}=\delta_{ll'}$$
+	and likewise if $T$ is left normal then
+	$$\sum_{il}T_{lir}T^*_{lir'}=\delta_{rr'}.$$
+	See figure~\ref{lr-normal} for a graphical depiction of this property.
+
+	\begin{Figure}
+		\center\includegraphics[width=.55\textwidth]{./Figures/lr_normal.eps}
+		\captionof{figure}{\textit{Left normality (green) and right normality (red).
+		Bottom tensors are complex conjugated.}}
+		\label{lr-normal}
+	\end{Figure}
 
 	\subsection{Generating a MPS from a tensor}
 	The first step of the iterative process for generating a MPS from a
@@ -198,7 +214,7 @@ very graciously directed this project.}}
 	three indices, each of dimension $d$. The input tensor $\psi$ is
 	reshaped into a matrix $\psi_{MAT}$ by squashing indices the two
 	leftmost indices into one index while keeping the rightmost index
-	separated. The singular value decomposition is then performed on
+	separated. The singular value decomposition (see appendix) is then performed on
 	$\psi_{MAT}$. $\Sigma$ is truncated and renormalized to $\Sigma'$
 	such that the bond index between $V$ and $\Sigma$ is less than or
 	equal to the bond dimension $\chi$. The truncated matrix $\Sigma'$
@@ -212,39 +228,24 @@ very graciously directed this project.}}
 	corresponding to the leftmost site is the only untouched tensor.
 	See figure~\ref{mps-creation} for a depiction of this iterative
 	process.
+
 	\begin{Figure}
-		\center\includegraphics[width=.7\textwidth]{./Figures/mps-creation.eps}
-		\captionof{figure}{\textit{How a MPS is generated using iterative SVD with
-		an input tensor with four indices. Steps are numbered accordingly. The
-		final orthogonality center is in blue.}}
-		\label{mps-creation}
-	\end{Figure}
-	%%%%%%%% BREAK IN MULTICOL
-	\end{multicols}
-	\begin{Figure}
-		\center\includegraphics[width=.9\textwidth]{./Figures/svd.eps}
+		\center\includegraphics[width=.7\textwidth]{./Figures/svd.eps}
 		\captionof{figure}{\textit{Separating the first site index from $\psi$.}}
 		\label{svd}
 	\end{Figure}
-	\begin{multicols}{2}
+
+	\begin{Figure}
+		\center\includegraphics[width=.7\textwidth]{./Figures/mps-creation.eps}
+		\captionof{figure}{\textit{How a MPS is generated using iterative SVD with
+		an input tensor with four indices. The
+		final orthogonality center is in blue.}}
+		\label{mps-creation}
+	\end{Figure}
 
 	The leftmost site
 	in figure~\ref{svd} is an orthonormal matrix by definition of the
 	SVD. Non-boundary sites in the final chain resulting from
-	iteratively applying this	method are \textit{right normal}, which is
-	a loose generalization of orthonormality. Algebraically, if a tensor
-	$T_{L,i,R}\in\mathds{C}^{b\times d\times b}$
-	is right normal, then
-	$$\sum_{i,R}T_{L,i,R}T^*_{L',i,R}=\delta_{L,L'}$$
-	and likewise if $T$ is left normal then
-	$$\sum_{i,L}T_{L,i,R}T^*_{L,i,R'}=\delta_{R,R'}.$$
-	See figure~\ref{lr-normal} for a graphical depiction of this property.
-
-	\begin{Figure}
-		\center\includegraphics[width=.55\textwidth]{./Figures/lr_normal.eps}
-		\captionof{figure}{\textit{Left normality (green) and right normality (red).}}
-		\label{lr-normal}
-	\end{Figure}
 
 	If a MPS consists entirely of a nonnegative (possibly zero, as in
 	figure~\ref{mps-creation}) number of left normal tensors facing a
@@ -266,16 +267,6 @@ very graciously directed this project.}}
 		necessary computation.}}
 		\label{local-site-eval}
 	\end{Figure}
-	However, this requires that the orthogonality center is already
-	located on site $i$. Since this clearly will not always be the case,
-	we need a way to move the orthogonality center from one site to another.
-	The general idea is depicted in figure~\ref{moving-ortho-center}.
-	Briefly, the orthogonality center's site index is squashed with the
-	left (right) bond index. Next it is split into two matrices
-	using the QR (LQ) decomposition, and the left (right) normal matrix
-	is reshaped into a rank three tensor. The remaining matrix is
-	contracted into the corresponding right (left) neighbor tensor.
-
 	\begin{Figure}
 		\center\includegraphics[width=.7\textwidth]{./Figures/move-ortho-center.eps}
 		\captionof{figure}{\textit{Moving the orthogonality center one site
@@ -286,6 +277,16 @@ very graciously directed this project.}}
 		 the QR factorization.}}
 		\label{moving-ortho-center}
 	\end{Figure}
+	However, this requires that the orthogonality center is already
+	located on site $i$. Since this clearly will not always be the case,
+	we need a way to move the orthogonality center from one site to another.
+	The general idea is depicted in figure~\ref{moving-ortho-center}.
+	Briefly, the orthogonality center's site index is squashed with the
+	left (right) bond index. Next it is split into two matrices
+	using the QR (LQ) decomposition, and the left (right) normal matrix
+	is reshaped into a rank three tensor. The remaining matrix is
+	contracted into the corresponding right (left) neighbor tensor.
+
 
 
 	\subsection{Time Evolving Block Decimation}
@@ -300,7 +301,7 @@ very graciously directed this project.}}
 	$$\hat{H}=\sum_{i=1}^{N-1}\sigma_z^{(i)}\sigma_z^{(i+1)}+J\sum_{i=1}^N\sigma_x^{(i)}$$
 	this amounts to applying $p$ Trotterized operators (setting $\hbar=1$):
 	\[
-		\hat{U}(t) =
+		\hat{U}(t) \approx
 		\left[
 			\left(\prod_{i=1}^{N-1}
 				e^{-i\sigma_z^{(i)}\sigma_z^{(i+1)}\Delta t}
@@ -371,7 +372,7 @@ very graciously directed this project.}}
 		sites.append($T_{curr}$)\;
 		\For{i $\mapsfrom$ 2 to $N-1$}{
 			$d_{next}$, $T_{next}$, $T_{curr}$ $\mapsfrom$ split\_tensor($T_{next}$, $2^{N-i}$, $2^i$, $\chi$)\;
-			\eIf{length($T_{curr}$) = $\chi^2$ * 2}{
+			\eIf{length($T_{curr}$) = $2\chi^2$}{
 				$T_{curr}$ $\mapsfrom$ reshape($T_{curr}$, $\chi$, 2, $\chi$)\;
 			}{
 				$d_{prev}$ $\mapsfrom$ length($T_curr$) $\div$ $(2 \times d_{next})$\;
