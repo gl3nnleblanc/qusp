@@ -45,35 +45,42 @@
 % a separate \thanks must be used for each paragraph as LaTeX2e's \thanks
 % was not built to handle multiple paragraphs
 %
-\author{Glenn~LeBlanc,
-Karthik~Siva
+\author{Glenn~LeBlanc
 \thanks{This project was part of the Berkeley Physics Directed
 Reading Program, which allows undergraduates to explore novel
-material under the auspices of a graduate student mentor. K. Siva
+material under the auspices of a graduate student mentor. Karthik Siva
 very graciously directed this project.}}
 
 \maketitle
 \begin{multicols}{2}
 
-\section*{Introduction}
-	\subsection*{Many-Body Wavefunctions as Tensors}
-		Consider a spin-$\frac{1}{2}$ particle. The particle's state is given by
+\section{Introduction}
+	\subsection{Many-Body Wavefunctions as Tensors}
+		Consider a spin-$\frac{1}{2}$ particle or two-level system. The systems's state is given by
 		$\ket{\psi}\in\mathds{C}^2$, and for some computational basis
 		$\{\ket{0}, \ket{1}\}$ we can write
 		$$\ket{\psi}=\alpha\ket{0}+\beta\ket{1}$$
 		with
 		$$|\alpha|^2+|\beta|^2=1.$$
-		This is the principle of superpostion-- the particle is superposed
+		This is the principle of superpostion-- the system is superposed
 		between the two basis states $\ket{0}$ and $\ket{1}$. Now if we add
-		a second spin-$\frac{1}{2}$ particle, the many-body system
+		a second spin-$\frac{1}{2}$ particle or a second two-level system, the many-body system
 		$\ket{\Psi}$ is in some superposition of the four states
 		$$\ket{\Psi}=\alpha\ket{00}+\beta\ket{01}+\gamma\ket{10}+\delta\ket{11}.$$
 		Generally, for $N$ qubits (qudits) the system is fully
 		parameterized by $2^N$ ($d^N$) complex numbers:
 		$\ket{\Psi}\in\mathds{C}^{2^N}$. Notice the exponential scaling
-		here. It is useful also to notice the natural bijection between
+		here--
+		storing the individual coefficients of $\ket{\Psi}$ for 30 sites
+		requires about 8 GB of memory, and dealing with the raw
+		coefficients of 40 sites requires over 8 TB.
+		If we want to time evolve $\ket{\Psi}$ under some Hamiltonian $\hat{H}$
+		$$\ket{\Psi(t)}=e^{-it\hat{H}/\hbar}\ket{\Psi}$$
+		we need to exponentiate the matrix $-it\hat{H}/\hbar\in\mathds{C}^{2^N\times2^N}$ and multiply the vector $\ket{\Psi}$ by this result, which takes $O\left(\left(2^N\right)^3\right)$ time. Thus it is extremely worthwhile to find more efficient ways of storing and manipulating the
+		quantum state $\ket{\Psi}$ without completely sacrificing fidelity.
+		As a first step, it is useful also to notice the isomorphism between
 		the two spaces
-		$$\mathds{C}^{2^N}\longleftrightarrow \mathds{C}^{2\times\cdots\times 2}$$
+		$$\mathds{C}^{2^N}\cong\mathds{C}^{2\times\cdots\times 2}$$
 		meaning we can instead conceptualize $\ket{\Psi}$ as a
 		\textit{tensor}:
 		$$\ket{\Psi}\in\mathds{C}^{2\times\cdots\times2}$$
@@ -95,7 +102,7 @@ very graciously directed this project.}}
 			\end{align*}
 
 
-	\subsection*{Tensor Networks}
+	\subsection{Tensor Networks}
 	A \textit{tensor network} is an undirected graph whose nodes
 	represent tensors and whose edges correspond to tensor indices. An
 	edge between two tensors corresponds to a contraction along the
@@ -142,7 +149,7 @@ very graciously directed this project.}}
 
 
 
-\section*{Matrix Product States}
+\section{Matrix Product States}
 	A \textit{matrix product state} (MPS) is a particular class
 	of
 	tensor network consisting of a chain of tensors each having one
@@ -185,7 +192,7 @@ very graciously directed this project.}}
 	individual $2^N$ coefficients of $\ket{\Psi}$.
 
 
-	\subsection*{Generating a MPS from a tensor}
+	\subsection{Generating a MPS from a tensor}
 	The first step of the iterative process for generating a MPS from a
 	tensor is depicted in figure~\ref{svd} for an initial tensor with
 	three indices, each of dimension $d$. The input tensor $\psi$ is
@@ -246,7 +253,7 @@ very graciously directed this project.}}
 	\textit{orthogonality center}.
 
 
-	\subsection*{Moving the Orthogonality Center}
+	\subsection{Moving the Orthogonality Center}
 	The orthogonality center presents a useful way of evaluating the
 	expectation of a local operator $M$ on site $i$, depicted in
 	figure~\ref{local-site-eval}.
@@ -281,7 +288,7 @@ very graciously directed this project.}}
 	\end{Figure}
 
 
-	\subsection*{Time Evolving Block Decimation}
+	\subsection{Time Evolving Block Decimation}
 	Time evolving block decimation (TEBD) is a method for efficiently
 	simulating 1D quantum systems with low entanglement. By leveraging
 	the fidelity of the system's MPS decomposition, a
@@ -330,16 +337,16 @@ very graciously directed this project.}}
 	Hamiltonian might look like.
 
 
-\section*{Package Overview}
+\section{Package Overview}
 	This section provides an overview of the real core of this project: a
 	Julia package for creating and manipulating matrix
 	product states, located at~\\
 	\url{https://github.com/gl3nnleblanc/pdrp2021}.
-	\subsection*{Julia}
+	\subsection{Julia}
 	Julia is a modern programming language incubated at MIT in 2009 and
 	designed from the beginning with high performance in mind~\cite{Julia-lang}.
 	Julia is fast, easy to use, and open source.
-	\subsection*{Algorithms}
+	\subsection{Algorithms}
 	The following section contains pseucode outlining the main ideas
 	of what was implemented in the package. Again, the full code written
 	in Julia is available at the repository.
@@ -388,7 +395,7 @@ very graciously directed this project.}}
 	%TODO: orthogonality center moving pseudocode
 	%TODO: single tebd sweep pseudocode
 	%TODO: tebd evolution pseudocode
-	\subsection*{Examples}
+	\subsection{Examples}
 	There are three example notebooks contained in the repository (as
 	linked above). Some highlights:
 
@@ -422,7 +429,7 @@ very graciously directed this project.}}
 
 
 
-	\subsection*{Next Steps}
+	\subsection{Next Steps}
 	This project felt extremely rewarding and I'm planning to continue
 	sporadically adding things to it over the summer when I have the
 	time. Two things that I'd like to implement are DMRG~\cite{DMRG}
@@ -432,6 +439,12 @@ very graciously directed this project.}}
 
 \bibliography{./references}
 
+
+\appendix
+\section{Singular Value Decomposition}
+%TODO
+\section{QR and LR Decompositions}
+%TODO
 \end{multicols}
 
 
