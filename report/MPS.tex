@@ -32,6 +32,7 @@
   {\endminipage\par\medskip}
 
 \begin{document}
+\RestyleAlgo{boxruled}
 
 
 \title{Matrix Product States}
@@ -57,15 +58,15 @@ very graciously directed this project.}}
 \section{Introduction}
 	\subsection{Many-Body Wavefunctions as Tensors}
 		Consider a spin-$\frac{1}{2}$ particle or two-level system. The systems's state is given by
-		$\ket{\psi}\in\mathds{C}^2$, and for some computational basis
+		$\ket{\psi}\in\mathds{C}^2$, and for some basis labeled by
 		$\{\ket{0}, \ket{1}\}$ we can write
 		$$\ket{\psi}=\alpha\ket{0}+\beta\ket{1}$$
 		with
 		$$|\alpha|^2+|\beta|^2=1.$$
-		This is the principle of superpostion-- the system is superposed
-		between the two basis states $\ket{0}$ and $\ket{1}$. Now if we add
-		a second spin-$\frac{1}{2}$ particle or a second two-level system, the many-body system
-		$\ket{\Psi}$ is in some superposition of the four states
+		This is the principle of superpostion-- the system
+		is in a superposition of the two basis states $\ket{0}$ and $\ket{1}$. Now if we add
+		a second spin-$\frac{1}{2}$ particle or a second two-level system, the state of the many-body system
+		is described by a vector $\ket{\Psi}$ in a tensor product Hilbert space $\mathcal{H}=\mathds{C}^2\otimes\mathds{C}^2$ and may be in some superposition of the four basis states
 		$$\ket{\Psi}=\alpha\ket{00}+\beta\ket{01}+\gamma\ket{10}+\delta\ket{11}.$$
 		Generally, for $N$ qubits (qudits) the system is fully
 		parameterized by $2^N$ ($d^N$) complex numbers:
@@ -108,7 +109,8 @@ very graciously directed this project.}}
 	edge between two tensors corresponds to a contraction along the
 	depicted axis of each tensor. Use of this graphical language for
 	representing quantum systems is attractive since it unveils relevant
-	entanglement properties~\cite{TnIntro}.
+	entanglement properties and simplifies the expression of tensor network operations involving many indices~\cite{TnIntro}. The
+	\textit{rank} of a tensor is given by the number of indices that are associated with it--- this is somewhat of an abuse of terminology, since rank has an entirely different meaning when associated with linear operators, and any tensor is isomorphic to a (multi)linear operator.
 	\begin{Figure}
 		\center\includegraphics[width=.9\textwidth]{./Figures/tensors.eps}
 		\captionof{figure}{\textit{A graphical depiction of a scalar $c$, vector
@@ -155,12 +157,12 @@ very graciously directed this project.}}
 	tensor network consisting of a chain of tensors each having one
 	dangling edge and a bond between their nearest neighbors. See figure
 	\ref{mps-example} for an example of a MPS with three sites with
-	periodic and nonperiodic boundary conditions. From here we only
-	consider MPS with nonperiodic boundary conditions.
+	periodic and open boundary conditions. From here we only
+	consider MPS with open boundary conditions.
 	\begin{Figure}
 		\center\includegraphics[width=.55\textwidth]{./Figures/mps-example.eps}
 		\captionof{figure}{\textit{Two three-site MPS, the first lacking
-		periodic boundary conditions and the second with periodic boundary conditions.}}
+		periodic boundary conditions and the second with open boundary conditions.}}
 		\label{mps-example}
 	\end{Figure}
 	The indices $\alpha,\beta,\gamma$ in figure~\ref{mps-example} are called
@@ -209,6 +211,7 @@ very graciously directed this project.}}
 	\end{Figure}
 
 	\subsection{Generating a MPS from a tensor}
+	We now give a presription for how to express an arbitrary wavefunction as an MPS of a given bond dimension, starting from an exact represntation as a vector.
 	The first step of the iterative process for generating a MPS from a
 	tensor is depicted in figure~\ref{svd} for an initial tensor with
 	three indices, each of dimension $d$. The input tensor $\psi$ is
@@ -343,18 +346,19 @@ very graciously directed this project.}}
 	Julia package for creating and manipulating matrix
 	product states, located at~\\
 	\url{https://github.com/gl3nnleblanc/pdrp2021}.
-	\subsection{Julia}
-	Julia is a modern programming language incubated at MIT in 2009 and
+	\subsection{Toolchain}
+	This package is written in Julia, a modern programming language incubated at MIT in 2009 and
 	designed from the beginning with high performance in mind~\cite{Julia-lang}.
 	Julia is fast, easy to use, and open source.
+	Git and TravisCI proved useful during development.
 	\subsection{Algorithms}
 	The following section contains pseucode outlining the main ideas
 	of what was implemented in the package. Again, the full code written
 	in Julia is available at the repository.
 	\begin{algorithm}[H]
-		\KwData{input tensor $T$, left\_dim, right\_dim, $\chi$}
+		\KwData{input tensor $T$, $d_{left}$, $d_{right}$, $\chi$}
 		\KwResult{length($\Sigma$), $T_{next}$, $V$}
-		$T_{MAT}$ $\mapsfrom$ reshape(T, left\_dim, right\_dim)\;
+		$T_{MAT}$ $\mapsfrom$ reshape(T, $d_{left}$, $d_{right}$)\;
 		$T_{next}$, $\Sigma$, $V^\dagger$ $\mapsfrom$ SVD($T_{MAT}$)\;
 		$V$ $\mapsfrom$ $(V^\dagger)^\dagger$\;
 		$\Sigma$ $\mapsfrom$ truncate\_to\_chi($\Sigma$, $\chi$)\;
@@ -363,7 +367,7 @@ very graciously directed this project.}}
 		\caption{Helper function for splitting a tensor.}
 		\label{split-tensor}
 	\end{algorithm}
-	\vspace{20px}
+	Algorithm~\ref{split-tensor} is a helper method to slice a tensor along some specified axis using the SVD, and runs in time $\mathcal{O}(d_{left}^2d_{right}+d_{left}d_{right}^2)$~\cite{matrix-stuff}.
 	\begin{algorithm}[H]
 		\KwData{input tensor $\Psi$, desired bond dimension $\chi$}
 		N $\mapsfrom$ tensor rank of $\Psi$\;
@@ -384,18 +388,78 @@ very graciously directed this project.}}
 		$T_{curr}$ $\mapsfrom$ reshape($T_curr$, 2, 2, :)\;
 		sites.append($T_{curr}$)\;
 		sites.append($T_{next}$)\;
-		\Return MPS(sites, $\chi$, N)\;
+		\Return MPS(sites) having bond dimension $\chi$ and orthogonality center at $N$\;
 		\caption{Generating a MPS from input tensor $\Psi$.}
 		\label{mps-gen}
 	\end{algorithm}
 
 		Algorithm~\ref{mps-gen} returns a MPS wrapper consisting of an array of
 		tensors arranged from left to right in descending order. Said another way,
-		the $N$th entry of this array is the leftmost site.
+		the $N$th entry of this array is the leftmost site. For an input tensor $T$ of rank $N$ with each index having dimension 2, algorithm~\ref{mps-gen} requires $N$ SVD computations on matrices of logarithmically decreasing size, resulting in a runtime of $\mathcal{O}(2^{2N})$, which is dominated by the runtime of the first SVD. The truncated SVD can be used to avoid exponential cost, but was not in this package, as there are currently no suitable TSVD implementations in Julia. (This would be a good next step.)
 
-	%TODO: orthogonality center moving pseudocode
-	%TODO: single tebd sweep pseudocode
-	%TODO: tebd evolution pseudocode
+	\begin{algorithm}[H]
+		\KwData{MPS $M$, target\_site}
+		\KwResult{MPS $M'$}
+		$N$ $\mapsfrom$ $M$.sites.length\;
+		\eIf{target\_site = $M$.orthogonality\_site}{
+			\Return $M$\;
+		}{
+			updated\_sites $\mapsfrom$ copy($M$.sites)\;
+			\eIf{target\_site $>$ $M$.orthogonality\_site}{
+			\For{every site between $M$.orthogonality\_site and target\_site}{
+				$d_{left}$ $\mapsfrom$ site.left\_dim\;
+				$L$, $Q$ $\mapsfrom$ LQ(reshape(site, $d_{left}$, :))\;
+				contract $L$ into left neighbor and replace entry in updated\_sites\;
+			}
+		}{
+			\For{every site between $M$.orthogonality\_site and target\_site}{
+				$d_{right}$ $\mapsfrom$ site.right\_dim\;
+				$Q$, $R$ $\mapsfrom$ QR(reshape(site, :, $d_{right}$))\;
+				contract $R$ into right neighbor and replace entry in updated\_sites\;
+			}
+
+		}
+		}
+		\Return $M'$(updated\_sites)\;
+		\caption{Moving the orthogonality center.}
+		\label{move-orthogonality-center}
+	\end{algorithm}
+	Algorithm~\ref{move-orthogonality-center} moves the orthogonality center of an MPS. Since $\mathcal{O}(N)$ QR (LQ) decompositions and on matrices of size $2\chi\times\chi$ ($\chi\times2\chi$) are required, along with $\mathcal{O}(N)$ contractions along indices of dimension $\chi$, the total runtime is $\mathcal{O}(N\chi^3)$.
+
+	\begin{algorithm}[H]
+		\KwData{MPS $M$, $H_1$, $H_2$, $t$}
+		\KwResult{MPS $M'$}
+		updated\_sites = new array\;
+		previous\_site $\mapsfrom$ $M$.sites[N]\;
+		\For{i = N to 2}{
+			left\_site $\mapsfrom$ previous\_site\;
+			right\_site $\mapsfrom$ $M$.sites[i-1]\;
+			$\psi_{ab\chi}$ $\mapsfrom$ contract(left\_site, right\_site)\;
+			$\psi_{ab\chi}$ $\mapsfrom$ $\sum_{i,j,k,l}\psi_{ij\chi}$
+			$[\exp(-itH_1/2)]_{ik}[\exp(-itH_1/2)]_{jl}$
+			$[\exp(-itH_2)]_{abjl}$\;
+			new\_left\_site, new\_right\_site $\mapsfrom$ split\_tensor($\psi$, 2$\times$left\_edge\_dim, 2$\times$right\_edge\_dim)\;
+			new\_left\_site $\mapsto$ updated\_sites[i]\;
+			previous\_site $\mapsfrom$ new\_right\_site\;
+		}
+		previous\_site $\mapsto$ updated\_sites[1]\;
+		\Return $M'$(updated\_sites)\;
+		\caption{A single TEBD sweep.}
+		\label{single-tebd-sweep}
+	\end{algorithm}
+	Algorithm \ref{single-tebd-sweep} performs a single sweep of TEBD, as depicted in figure~\ref{TEBD}. $H_1$ and $H_2$ represent the single and double body terms, respectively, of the Hamiltonian of interest. The runtime of a single sweep is $\mathcal{O}(N\chi^3)$~\cite{Vidal}.
+	\begin{algorithm}[H]
+		\KwData{MPS $M$, $H_1$, $H_2$, $t$, resolution}
+		\KwResult{MPS $M'$}
+		$M'$ = $M$
+		\For{1 to resolution}{
+						$M'$ = single\_tebd\_step($M'$, $H_1$, $H_2$, $t$/resolution)\;
+		}
+		\Return $M'$\;
+		\caption{Full TEBD.}
+		\label{full-tebd}
+	\end{algorithm}
+	The runtime for~\ref{full-tebd} is clearly $\mathcal{O}(rN\chi^3)$ with resolution $r$.
 	\subsection{Examples}
 	There are three example notebooks contained in the repository (as
 	linked above). Some highlights:
@@ -435,7 +499,7 @@ very graciously directed this project.}}
 	sporadically adding things to it over the summer when I have the
 	time. Two things that I'd like to implement are DMRG~\cite{DMRG}
 	and a neural network using a MPS whose sites correspond to lifted
-	features~\cite{mps-ml},~\cite{Huggins}.
+	features~\cite{mps-ml, Huggins}.
 
 
 \bibliography{./references}
