@@ -511,7 +511,7 @@ very graciously directed this project.}}
 
 	Figure~\ref{fidelity-graphs} plots fidelity between the target state $\ket{\psi(t)}=\hat{U}(t)\ket{\psi}$ found using matrix multiplication and its approximation found via TEBD using fifty sweeps for a system with eight sites using the ising model in eq.~\ref{ising} with $J=1$. A variety of bond dimensions are used, demonstrating the increase in fidelity for increasing $\chi$. For $\chi>2^{N/2}$, fidelity stops increasing, and the observed fidelity loss is due solely to Trotterization error.
 
-	Figure~\ref{entanglement-graphs} depict the bipartite entanglement entropy of an eight site system with $J=0$, $J=0.5$, and $J=1$. At $J=0$, $\hat{H}$ does not generate entanglement. At $J=0.5$, the entanglement entropy stays below about 0.7. With $J=1$, the entanglement entropy quick surpasses this value.
+	Figure~\ref{entanglement-graphs} depicts the bipartite Von Neumann entropy of an eight site system with $J=0$, $J=0.5$, and $J=1$ initialized in the $\ket{\downarrow\cdots\downarrow}$ state. At $J=0$, entanglement does not increase. At $J=0.5$, the entanglement entropy stays below about 0.7. With $J=1$, the entanglement entropy quickly surpasses this value.
 
 	\begin{Figure}
 		\center\includegraphics[width=0.95\textwidth]{./Figures/j-0-entanglement.png}\\
@@ -524,9 +524,7 @@ very graciously directed this project.}}
 
 
 	\subsection{Next Steps}
-	This project felt extremely rewarding and I'm planning to continue
-	sporadically adding things to it over the summer when I have the
-	time. Two things that I'd like to implement are DMRG~\cite{DMRG}
+	Two things that I'd like to implement are DMRG~\cite{DMRG}
 	and a neural network using an MPS whose sites correspond to lifted
 	features~\cite{mps-ml, Huggins}.
 
@@ -545,7 +543,7 @@ where $V\in \mathds{F}^{m\times m}$ is orthonormal, $\Sigma\in\mathds{F}^{n\time
 	A=\sum_{i=1}^r\sigma_i\ket{u_i}\bra{v_i}
 \]
 for orthonormal sets $\{\ket{u_i}\}_{i=1}^n$, $\{\ket{v_i}\}_{i=1}^m$ and nonnegative values $\sigma_i$, with $\text{rank}(A)=r$. The time complexity to calculate the SVD of a $A$ is $\mathcal{O}(n^2m+m^2n)$~\cite{matrix-stuff}.
-\section{QR and LR Decompositions}
+\section{QR and LQ Decompositions}
 The \textit{QR} decomposition of a matrix $A\in\mathds{F}^{n\times m}$ decomposes $A$ as
 \[
 	A=QR
