@@ -156,7 +156,7 @@ very graciously directed this project.}}
 	of
 	tensor network consisting of a chain of tensors each having one
 	dangling edge and a bond between their nearest neighbors. See figure
-	\ref{mps-example} for an example of a MPS with three sites with
+	\ref{mps-example} for an example of an MPS with three sites with
 	periodic and open boundary conditions. From here we only
 	consider MPS with open boundary conditions.
 	\begin{Figure}
@@ -210,9 +210,9 @@ very graciously directed this project.}}
 		\label{lr-normal}
 	\end{Figure}
 
-	\subsection{Generating a MPS from a tensor}
+	\subsection{Generating an MPS from a tensor}
 	We now give a presription for how to express an arbitrary wavefunction as an MPS of a given bond dimension, starting from an exact represntation as a vector.
-	The first step of the iterative process for generating a MPS from a
+	The first step of the iterative process for generating an MPS from a
 	tensor is depicted in figure~\ref{svd} for an initial tensor with
 	three indices, each of dimension $d$. The input tensor $\psi$ is
 	reshaped into a matrix $\psi_{MAT}$ by squashing indices the two
@@ -240,7 +240,7 @@ very graciously directed this project.}}
 
 	\begin{Figure}
 		\center\includegraphics[width=.7\textwidth]{./Figures/mps-creation.eps}
-		\captionof{figure}{\textit{How a MPS is generated using iterative SVD with
+		\captionof{figure}{\textit{How an MPS is generated using iterative SVD with
 		an input tensor with four indices. The
 		final orthogonality center is in blue.}}
 		\label{mps-creation}
@@ -250,7 +250,7 @@ very graciously directed this project.}}
 	in figure~\ref{svd} is an orthonormal matrix by definition of the
 	SVD. Non-boundary sites in the final chain resulting from
 
-	If a MPS consists entirely of a nonnegative (possibly zero, as in
+	If an MPS consists entirely of a nonnegative (possibly zero, as in
 	figure~\ref{mps-creation}) number of left normal tensors facing a
 	single unconstrained tensor followed by a chain of right normal
 	tensors we call the single unconstrained tensor the
@@ -301,7 +301,10 @@ very graciously directed this project.}}
 	$$\hat{U}(t)=\exp\{-i\hat{H}t/\hbar\}$$
 	can be applied step-by-step to the MPS with bond dimensions truncated
 	after each step. For the 1-D transverse field Ising model
-	$$\hat{H}=\sum_{i=1}^{N-1}\sigma_z^{(i)}\sigma_z^{(i+1)}+J\sum_{i=1}^N\sigma_x^{(i)}$$
+	\begin{equation}
+		\hat{H}=\sum_{i=1}^{N-1}\sigma_z^{(i)}\sigma_z^{(i+1)}+J\sum_{i=1}^N\sigma_x^{(i)}
+		\label{ising}
+	\end{equation}
 	this amounts to applying $p$ Trotterized operators (setting $\hbar=1$):
 	\[
 		\hat{U}(t) \approx
@@ -389,11 +392,11 @@ very graciously directed this project.}}
 		sites.append($T_{curr}$)\;
 		sites.append($T_{next}$)\;
 		\Return MPS(sites) having bond dimension $\chi$ and orthogonality center at $N$\;
-		\caption{Generating a MPS from input tensor $\Psi$.}
+		\caption{Generating an MPS from input tensor $\Psi$.}
 		\label{mps-gen}
 	\end{algorithm}
 
-		Algorithm~\ref{mps-gen} returns a MPS wrapper consisting of an array of
+		Algorithm~\ref{mps-gen} returns an MPS wrapper consisting of an array of
 		tensors arranged from left to right in descending order. Said another way,
 		the $N$th entry of this array is the leftmost site. For an input tensor $T$ of rank $N$ with each index having dimension 2, algorithm~\ref{mps-gen} requires $N$ SVD computations on matrices of logarithmically decreasing size, resulting in a runtime of $\mathcal{O}(2^{2N})$, which is dominated by the runtime of the first SVD. The truncated SVD can be used to avoid exponential cost, but was not in this package, as there are currently no suitable TSVD implementations in Julia. (This would be a good next step.)
 
@@ -451,7 +454,7 @@ very graciously directed this project.}}
 	\begin{algorithm}[H]
 		\KwData{MPS $M$, $H_1$, $H_2$, $t$, resolution}
 		\KwResult{MPS $M'$}
-		$M'$ = $M$
+		$M'$ = $M$\;
 		\For{1 to resolution}{
 						$M'$ = single\_tebd\_step($M'$, $H_1$, $H_2$, $t$/resolution)\;
 		}
@@ -472,22 +475,32 @@ very graciously directed this project.}}
 		\captionof{figure}{\textit{Compressing an image with an MPS.
 		Clockwise from top left: $\chi=2$, $\chi=9$, $\chi=20$, $\chi=100$,
 		with compression ratios of 1927.5, 126.2, 31.3, and 2.24,
-		respectively. Lossless storage as a MPS results in a compression ratio
+		respectively. Lossless storage as an MPS results in a compression ratio
 		less than 1.}}
 		\label{lenna-compression}
 	\end{Figure}
 
+	Figure~\ref{lenna-compression} displays four images compressed as MPS with successively higher bond dimensions. The initial $512\times512$ image is mapped to a tensor with 18 indices, each having dimension 2. The resulting tensor is fed into algorithm~\ref{mps-gen} over a variety of different bond dimensions. $\chi=100$ results in very few visual artifacts, although artifacts become more visible when either the full RGB spectrum is used or the original image contains noisier features. Lossless storage as an MPS requires $\chi=512$, which results in a compression ratio $\approx0.3<1$, meaning redundant information is required to store the image as an MPS in this case, and hence there is no advantage to using an MPS when lossless compression is required. It would be interesting to investigate better methods of transforming the input image into a rank 18 tensor, as the visual artifacts seem to be closely tied to the way in which the image was reduced to a tensor.
+
 	\begin{Figure}
-		\center\includegraphics[height=200px]{./Figures/ising_j1_interactions_heatmap.png}\hspace{50px}\includegraphics[height=200px]{./Figures/ising_j1_local_heatmap.png}
+		\center\includegraphics[height=300px]{./Figures/ising_heatmap.png}\includegraphics[height=300px]{./Figures/local_heatmap.png}
 		\captionof{figure}{\textit{Heatmaps of $\langle\sigma_z\rangle$ for each
 		site in a chain of 12 qubits time evolving under a ($J=1$) 1D Ising model with (left) and without (right) the local interaction term
-		$\sigma_z^{(i)}\sigma_z^{(i+1)}$. Using an MPS with $\chi=32$ and
-		running 1000 sweeps on an Intel i5-6600k @ 3.9 GHz took $\approx3$ minutes.}}
+		$\sigma_z^{(i)}\sigma_z^{(i+1)}$.}}
 		\label{tebd-heatmaps}
 	\end{Figure}
 
+	Figure~\ref{tebd-heatmaps} displays heatmaps of $\langle\sigma_z\rangle$ for each
+		site in a chain of 12 qubits time evolving under a ($J=1$) 1D transverse field Ising model (equation~\ref{ising}) with (left) and without (right) the local interaction term
+		$\sigma_z^{(i)}\sigma_z^{(i+1)}$. Time increases from bottom to top. Using an MPS with $\chi=32$ and
+		running 1000 sweeps on an Intel i5-6600k @ 3.9 GHz took $\approx3$ minutes, whereas the same calculation with the full $4096\times4096$ Hamiltonian takes over 25 minutes. Gains in runtime efficiency increase exponentially with the number of sites for fixed $\chi$.
+
+	Figure~\ref{tebd-graphs} plots the same values as the left heatmap in figure~\ref{tebd-heatmaps}, but with the value of $\braket{\sigma_z}$ at each site superimposed on top of each other. At $J\approx1$, $\braket{\sigma_z}\rightarrow 0$ with increasing $t$.
+
+
+
 	\begin{Figure}
-		\center\includegraphics[width=0.9\textwidth]{./Figures/ising_with_interactions.pdf}
+		\center\includegraphics[width=0.95\textwidth]{./Figures/ising_with_interactions.png}
 		\captionof{figure}{\textit{Graph corresponding to the left heatmap in figure~\ref{tebd-heatmaps}.}}
 		\label{tebd-graphs}
 	\end{Figure}
@@ -498,7 +511,7 @@ very graciously directed this project.}}
 	This project felt extremely rewarding and I'm planning to continue
 	sporadically adding things to it over the summer when I have the
 	time. Two things that I'd like to implement are DMRG~\cite{DMRG}
-	and a neural network using a MPS whose sites correspond to lifted
+	and a neural network using an MPS whose sites correspond to lifted
 	features~\cite{mps-ml, Huggins}.
 
 
@@ -507,9 +520,26 @@ very graciously directed this project.}}
 
 \appendix
 \section{Singular Value Decomposition}
-%TODO
+The \textit{singular value decomposition} decomposes a matrix $A\in\mathds{F}^{n\times m}$ as
+\[
+	A=U\Sigma V^\dagger
+\]
+where $V\in \mathds{F}^{m\times m}$ is orthonormal, $\Sigma\in\mathds{F}^{n\times m}$ is diagonal, and $U\in\mathds{F}^{n\times n}$ is orthonormal. Equivalently,
+\[
+	A=\sum_{i=1}^r\sigma_i\ket{u_i}\bra{v_i}
+\]
+for orthonormal sets $\{\ket{u_i}\}_{i=1}^n$, $\{\ket{v_i}\}_{i=1}^m$ and nonnegative values $\sigma_i$, with $\text{rank}(A)=r$. The time complexity to calculate the SVD of a $A$ is $\mathcal{O}(n^2m+m^2n)$~\cite{matrix-stuff}.
 \section{QR and LR Decompositions}
-%TODO
+The \textit{QR} decomposition of a matrix $A\in\mathds{F}^{n\times m}$ decomposes $A$ as
+\[
+	A=QR
+\]
+where $Q\in\mathds{F}^{n\times n}$ is orthonormal and $R\in\mathds{F}^{n\times m}$ is upper triangular. Similarly, the \textit{LQ} decomposition expresses $A$ as
+\[
+	A=LQ
+\]
+where $Q\in\mathds{F}^{m\times m}$ is orthonormal and $L\in\mathds{F}^{n\times m}$ is lower triangular.
+Either decomposition can be calculated by the Gram-Schmidt process in $\mathcal{O}(m^2n)$ time.
 \end{multicols}
 
 
