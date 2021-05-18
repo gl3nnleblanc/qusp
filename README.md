@@ -16,6 +16,9 @@
 	- constructing one from any initial tensor and specified bond dimension
 	- contraction back to a tensor of high (tensor-)rank
 	- time evolving block decimation
+* Several example notebooks, including
+    - Image compression via MPS
+    - TEBD for 1D transverse field Ising model
 
 ## Sources
 
