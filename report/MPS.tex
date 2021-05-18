@@ -497,12 +497,28 @@ very graciously directed this project.}}
 
 	Figure~\ref{tebd-graphs} plots the same values as the left heatmap in figure~\ref{tebd-heatmaps}, but with the value of $\braket{\sigma_z}$ at each site superimposed on top of each other. At $J\approx1$, $\braket{\sigma_z}\rightarrow 0$ with increasing $t$.
 
-
-
 	\begin{Figure}
 		\center\includegraphics[width=0.95\textwidth]{./Figures/ising_with_interactions.png}
 		\captionof{figure}{\textit{Graph corresponding to the left heatmap in figure~\ref{tebd-heatmaps}.}}
 		\label{tebd-graphs}
+	\end{Figure}
+
+	\begin{Figure}
+		\center\includegraphics[width=0.95\textwidth]{./Figures/fidelity_over_time.png}
+		\captionof{figure}{\textit{Fidelity between target state and TEBD with 50 sweeps over time. After about $t=\pi/2$, trotterization error kicks in.}}
+		\label{fidelity-graphs}
+	\end{Figure}
+
+	Figure~\ref{fidelity-graphs} plots fidelity between the target state $\ket{\psi(t)}=\hat{U}(t)\ket{\psi}$ found using matrix multiplication and its approximation found via TEBD using fifty sweeps for a system with eight sites using the ising model in eq.~\ref{ising} with $J=1$. A variety of bond dimensions are used, demonstrating the increase in fidelity for increasing $\chi$. For $\chi>2^{N/2}$, fidelity stops increasing, and the observed fidelity loss is due solely to Trotterization error.
+
+	Figure~\ref{entanglement-graphs} depict the bipartite entanglement entropy of an eight site system with $J=0$, $J=0.5$, and $J=1$. At $J=0$, $\hat{H}$ does not generate entanglement. At $J=0.5$, the entanglement entropy stays below about 0.7. With $J=1$, the entanglement entropy quick surpasses this value.
+
+	\begin{Figure}
+		\center\includegraphics[width=0.95\textwidth]{./Figures/j-0-entanglement.png}\\
+		\center\includegraphics[width=0.95\textwidth]{./Figures/j-0-5-entanglement.png}
+		\center\includegraphics[width=0.95\textwidth]{./Figures/j-1-entanglement.png}
+		\captionof{figure}{\textit{Bipartite entanglement entropy for eight site system under transverse field Ising model.}}
+		\label{entanglement-graphs}
 	\end{Figure}
 
 
