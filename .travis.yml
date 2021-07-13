@@ -1,4 +1,5 @@
 language: julia
+codecov: true
 
 jobs:
   include:
@@ -7,6 +8,7 @@ jobs:
       os: linux
       script:
         - julia -e 'using Pkg; Pkg.instantiate()'
-        - julia test/mps_test.jl
-        - julia test/tebd_test.jl
-      after_success: skip
+        - julia --code-coverage test/mps_test.jl
+        - julia --code-coverate test/tebd_test.jl
+      after_success:
+        - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
