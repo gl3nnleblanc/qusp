@@ -21,12 +21,12 @@
     - TEBD for 1D transverse field Ising model
 
 # TODO
-
-    - DMRG
-    - Learning example (see references)
+- DMRG (see references)
+- Learning example (see references)
 
 ## Sources
 
 1. [Efficient classical simulation of slightly entangled quantum computations](https://arxiv.org/pdf/quant-ph/0301063.pdf)
 1. [TensorNetwork for Machine Learning](https://arxiv.org/pdf/1906.06329.pdf)
 1. [Towards Quantum Machine Learning with Tensor Networks](https://arxiv.org/pdf/1803.11537.pdf)
+1. [Matrix product operators, matrix product states, and ab initio density matrix renormalization group algorithms](https://authors.library.caltech.edu/74031/2/1%252E4955108.pdf)
