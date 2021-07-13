@@ -9,6 +9,6 @@ jobs:
       script:
         - julia -e 'using Pkg; Pkg.instantiate()'
         - julia --code-coverage test/mps_test.jl
-        - julia --code-coverate test/tebd_test.jl
+        - julia --code-coverage test/tebd_test.jl
       after_success:
         - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
