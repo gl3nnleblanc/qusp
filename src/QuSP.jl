@@ -1,5 +1,6 @@
 module QuSP
 
-inclue("./tebd.jl")
+include("mps.jl")
+include("tebd.jl")
 
 end # QuSP

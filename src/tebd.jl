@@ -2,9 +2,9 @@ module TimeEvolvingBlockDecimation
 
 export Hamiltonian, block_evolve, tebd
 
-include("./mps.jl")
-using .MatrixProductState
 using Einsum
+
+using Main.QuSP.MatrixProductState
 
 """
     A 1D hamiltonian with a local term and nearest neighbor interactions.
@@ -37,7 +37,8 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
     @einsum evolved[q1, q2, right] :=
         interaction[q1, q2, c, d] * field[c, a] * half_field[d, b] * block[a, b, right]
     new_right_dim = size(evolved)[3]
-    _, new_left_site, new_right_site = split_tensor(evolved, 2, 2 * right_edge_dim, ψ.bond_dim)
+    _, new_left_site, new_right_site =
+        split_tensor(evolved, 2, 2 * right_edge_dim, ψ.bond_dim)
     push!(updated_sites, new_left_site)
     previous_right_site = reshape(new_right_site, size(second_leftmost_site)...)
 
@@ -66,7 +67,8 @@ function block_evolve(ψ::MPS, H::Hamiltonian, t::Number)
     @einsum block[left, q1, q2] := left_site[left, q1, chi] * rightmost_site[chi, q2]
     @einsum evolved[left, q1, q2] :=
         interaction[q1, q2, c, d] * half_field[c, a] * field[d, b] * block[left, a, b]
-    _, new_left_site, new_right_site = split_tensor(evolved, 2 * left_edge_dim, 2, ψ.bond_dim)
+    _, new_left_site, new_right_site =
+        split_tensor(evolved, 2 * left_edge_dim, 2, ψ.bond_dim)
     push!(updated_sites, reshape(new_left_site, size(left_site)...))
     push!(updated_sites, reshape(new_right_site, size(rightmost_site)...))
     res = MPS(reverse(updated_sites), ψ.bond_dim, 1)

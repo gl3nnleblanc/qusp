@@ -2,8 +2,8 @@ using Einsum
 using LinearAlgebra
 using Test
 
-include("../src/mps.jl")
-using .MatrixProductState
+include("../src/QuSP.jl")
+using Main.QuSP.MatrixProductState
 
 @testset "Matrix Product State Tests" begin
     @testset "Error Handling" begin
@@ -250,7 +250,7 @@ using .MatrixProductState
         σ_z = [1 0; 0 -1]
         I = [1 0; 0 1]
         conj_tensor = conj.(A_mps_tensor)
-        
+
         @einsum full_res :=
             A_mps_tensor[a, b, c, d, α] * σ_z[α, β] * conj_tensor[a, b, c, d, β]
         easy_res = eval_local_op(A_mps, σ_z, 1)
