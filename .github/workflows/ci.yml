@@ -24,11 +24,7 @@ jobs:
     - uses: actions/checkout@v2 # Checkout repo at $GITHUB_WORKSPACE
     - name: Install Dependencies
       run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
-    - name: Debug list
-      run: ls
     - name: MPS
-      run: |
-        ls $GITHUB_WORKSPACE
-        julia $GITHUB_WORKSPACE/test/mps_test.jl
+      run: julia --project=. $GITHUB_WORKSPACE/test/mps_test.jl
     - name: TEBD
-      run: julia $GITHUB_WORKSPACE/test/tebd_test.jl
+      run: julia --project=. $GITHUB_WORKSPACE/test/tebd_test.jl
