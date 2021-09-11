@@ -21,13 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Checkout repo under $GITHUB_WORKSPACE
+      run: actions/checkout@v2
     - name: Install Dependencies
       run: julia -e 'using Pkg; Pkg.instantiate()'
     - name: Debug list
       run: ls
     - name: MPS
       run: |
-        ls
-        julia test/mps_test.jl
+        ls $GITHUB_WORKSPACE
+        julia $GITHUB_WORKSPACE/test/mps_test.jl
     - name: TEBD
-      run: julia test/tebd_test.jl
+      run: julia $GITHUB_WORKSPACE/test/tebd_test.jl
