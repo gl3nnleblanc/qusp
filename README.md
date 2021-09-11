@@ -4,7 +4,7 @@
 
 **Qu**antum **S**imulation **P**layground
 
-[![Build Status](https://www.travis-ci.com/gl3nnleblanc/pdrp2021.svg?branch=master)](https://www.travis-ci.com/gl3nnleblanc/pdrp2021)
+![Build Status](https://github.com/gl3nnleblanc/qusp/actions/workflows/ci.yml/badge.svg)
 ## Overview
 
  This is a sanbox for quantum simulation using tensor network methods. This project is an ongoing extension of [work](https://github.com/gl3nnleblanc/pdrp2021) I did for the physics [directed reading program](https://berkeleyphysicsdrp.wixsite.com/physicsberkeleydrp) during Spring '21 at Berkeley.
