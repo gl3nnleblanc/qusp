@@ -2,9 +2,9 @@ using LinearAlgebra
 using Einsum
 using Test
 
-include("../src/tebd.jl")
-using .TimeEvolvingBlockDecimation
-using .TimeEvolvingBlockDecimation.MatrixProductState
+include("../src/QuSP.jl")
+using Main.QuSP.TimeEvolvingBlockDecimation
+using Main.QuSP.MatrixProductState
 
 
 @testset "Einsum Tests" begin
