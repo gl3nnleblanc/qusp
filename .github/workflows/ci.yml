@@ -23,7 +23,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2 # Checkout repo at $GITHUB_WORKSPACE
     - name: Install Dependencies
-      run: julia -e 'using Pkg; Pkg.instantiate()'
+      run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
     - name: Debug list
       run: ls
     - name: MPS
