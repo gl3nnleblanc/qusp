@@ -24,6 +24,8 @@ jobs:
     - name: Install Dependencies
       run: julia -e 'using Pkg; Pkg.instantiate()'
     - name: MPS
-      run: julia test/mps_test.jl
+      run: |
+        ls
+        julia test/mps_test.jl
     - name: TEBD
       run: julia test/tebd_test.jl
